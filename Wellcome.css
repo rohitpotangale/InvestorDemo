@@ -1,0 +1,744 @@
+:root {
+  --wl-bg: #f7f8fc;
+  --wl-surface: rgba(255, 255, 255, 0.76);
+  --wl-surface-solid: #ffffff;
+  --wl-border: rgba(226, 232, 240, 0.86);
+
+  --wl-text: #020617;
+  --wl-muted: #64748b;
+  --wl-subtle: #94a3b8;
+
+  --wl-accent: #4f46e5;
+  --wl-accent-2: #7c3aed;
+
+  --wl-ring: rgba(99, 102, 241, 0.08);
+
+  --wl-shadow:
+    0 20px 60px rgba(79, 70, 229, 0.08);
+}
+
+
+/* =====================================================
+   DARK THEME
+   ===================================================== */
+
+.investorlens-welcome.dark {
+  --wl-bg: #050816;
+
+  --wl-surface: rgba(255, 255, 255, 0.035);
+  --wl-surface-solid: #080d1d;
+
+  --wl-border: rgba(255, 255, 255, 0.09);
+
+  --wl-text: #ffffff;
+  --wl-muted: #94a3b8;
+  --wl-subtle: #64748b;
+
+  --wl-accent: #818cf8;
+  --wl-accent-2: #a78bfa;
+
+  --wl-ring: rgba(99, 102, 241, 0.16);
+
+  --wl-shadow:
+    0 20px 70px rgba(0, 0, 0, 0.35);
+}
+
+
+/* =====================================================
+   ROOT
+   ===================================================== */
+
+.investorlens-welcome {
+  min-height: 100vh;
+  width: 100%;
+
+  box-sizing: border-box;
+
+  padding:
+    120px
+    20px
+    64px;
+
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(99, 102, 241, 0.045),
+      transparent 34%
+    ),
+    var(--wl-bg);
+
+  color: var(--wl-text);
+
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+
+/* =====================================================
+   MAIN CONTAINER
+   ===================================================== */
+
+.welcome-shell {
+  width: 100%;
+  max-width: 980px;
+
+  min-height:
+    calc(100vh - 136px);
+
+  margin: 0 auto;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* =====================================================
+   CONTENT
+   ===================================================== */
+
+.welcome-content {
+  width: 100%;
+
+  text-align: center;
+
+  transform: translateY(-16px);
+}
+
+
+/* =====================================================
+   BRAND
+   ===================================================== */
+
+.welcome-brand {
+  margin-bottom: 16px;
+
+  color: var(--wl-accent);
+
+  font-size: 11px;
+
+  line-height: 1;
+
+  font-weight: 600;
+
+  letter-spacing: 0.35em;
+
+  text-transform: uppercase;
+}
+
+
+/* =====================================================
+   HEADING
+   ===================================================== */
+
+.welcome-content h1 {
+  margin: 0;
+
+  color: var(--wl-text);
+
+  font-size:
+    clamp(
+      36px,
+      5vw,
+      56px
+    );
+
+  line-height: 1.05;
+
+  font-weight: 600;
+
+  letter-spacing: -0.045em;
+}
+
+
+/* Gradient name */
+
+.welcome-gradient-text {
+  background:
+    linear-gradient(
+      110deg,
+      #4f46e5,
+      #7c3aed,
+      #2563eb
+    );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  color: transparent;
+}
+
+
+/* Dark gradient */
+
+.dark .welcome-gradient-text {
+  background:
+    linear-gradient(
+      110deg,
+      #a78bfa,
+      #818cf8,
+      #60a5fa
+    );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  color: transparent;
+}
+
+
+/* =====================================================
+   SUBTITLE
+   ===================================================== */
+
+.welcome-subtitle {
+  max-width: 560px;
+
+  margin:
+    16px
+    auto
+    0;
+
+  color: var(--wl-muted);
+
+  font-size: 16px;
+
+  line-height: 1.75;
+}
+
+
+/* =====================================================
+   SEARCH WRAPPER
+   ===================================================== */
+
+.welcome-search-wrap {
+  width: 100%;
+
+  max-width: 780px;
+
+  margin:
+    28px
+    auto
+    0;
+}
+
+
+/* =====================================================
+   SEARCH
+   ===================================================== */
+
+.welcome-search {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  width: 100%;
+
+  padding: 8px;
+
+  box-sizing: border-box;
+
+  border:
+    1px solid
+    var(--wl-border);
+
+  border-radius: 16px;
+
+  background:
+    var(--wl-surface-solid);
+
+  box-shadow:
+    var(--wl-shadow);
+
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+
+/* Focus */
+
+.welcome-search:focus-within {
+  border-color:
+    rgba(
+      165,
+      180,
+      252,
+      0.9
+    );
+
+  box-shadow:
+    var(--wl-shadow),
+    0 0 0 4px var(--wl-ring);
+}
+
+
+/* Dark search */
+
+.dark .welcome-search {
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.035
+    );
+}
+
+
+.dark .welcome-search:focus-within {
+  border-color:
+    rgba(
+      99,
+      102,
+      241,
+      0.4
+    );
+}
+
+
+/* =====================================================
+   SPARK
+   ===================================================== */
+
+.welcome-spark {
+  flex: 0 0 auto;
+
+  padding-left: 12px;
+
+  color: #6366f1;
+
+  font-size: 20px;
+
+  line-height: 1;
+}
+
+
+/* =====================================================
+   INPUT
+   ===================================================== */
+
+.welcome-search input {
+  min-width: 0;
+
+  flex: 1;
+
+  border: 0;
+
+  outline: 0;
+
+  background: transparent;
+
+  color: var(--wl-text);
+
+  padding:
+    16px
+    4px;
+
+  font: inherit;
+
+  font-size: 14px;
+}
+
+
+.welcome-search input::placeholder {
+  color: var(--wl-subtle);
+}
+
+
+/* =====================================================
+   SEND BUTTON
+   ===================================================== */
+
+.welcome-search button {
+  width: 48px;
+
+  height: 48px;
+
+  flex: 0 0 auto;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border: 0;
+
+  border-radius: 12px;
+
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      135deg,
+      #6366f1,
+      #7c3aed
+    );
+
+  box-shadow:
+    0 10px 20px
+    rgba(
+      99,
+      102,
+      241,
+      0.2
+    );
+
+  cursor: pointer;
+
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+
+.welcome-search button:hover {
+  transform: scale(1.03);
+
+  box-shadow:
+    0 14px 28px
+    rgba(
+      99,
+      102,
+      241,
+      0.25
+    );
+}
+
+
+.welcome-search button:active {
+  transform: scale(0.98);
+}
+
+
+.welcome-search button svg {
+  width: 20px;
+  height: 20px;
+}
+
+
+/* =====================================================
+   SUGGESTIONS
+   ===================================================== */
+
+.welcome-starters {
+  width: 100%;
+
+  max-width: 780px;
+
+  margin:
+    20px
+    auto
+    0;
+}
+
+
+.welcome-starters-label {
+  margin-bottom: 10px;
+
+  color: var(--wl-subtle);
+
+  font-size: 11px;
+
+  font-weight: 500;
+}
+
+
+.welcome-suggestions {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  justify-content: center;
+
+  gap: 8px;
+}
+
+
+/* Suggestion pill */
+
+.welcome-suggestion {
+  border:
+    1px solid
+    var(--wl-border);
+
+  border-radius: 999px;
+
+  padding:
+    8px
+    12px;
+
+  color: var(--wl-muted);
+
+  background:
+    var(--wl-surface);
+
+  font: inherit;
+
+  font-size: 11px;
+
+  line-height: 1.2;
+
+  cursor: pointer;
+
+  backdrop-filter: blur(14px);
+
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+
+.welcome-suggestion:hover {
+  color: var(--wl-accent);
+
+  border-color:
+    rgba(
+      99,
+      102,
+      241,
+      0.22
+    );
+
+  background:
+    rgba(
+      99,
+      102,
+      241,
+      0.055
+    );
+
+  transform:
+    translateY(-1px);
+}
+
+
+/* Dark suggestion hover */
+
+.dark .welcome-suggestion:hover {
+  color: #c4bcff;
+
+  border-color:
+    rgba(
+      124,
+      108,
+      241,
+      0.24
+    );
+
+  background:
+    rgba(
+      124,
+      108,
+      241,
+      0.08
+    );
+}
+
+
+/* =====================================================
+   DISCLAIMER
+   ===================================================== */
+
+.welcome-disclaimer {
+  max-width: 560px;
+
+  margin:
+    20px
+    auto
+    0;
+
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  color: var(--wl-subtle);
+
+  font-size: 11px;
+
+  line-height: 1.8;
+}
+
+
+.welcome-disclaimer svg {
+  width: 14px;
+
+  height: 14px;
+
+  flex: 0 0 auto;
+
+  margin-top: 3px;
+}
+
+
+/* =====================================================
+   THEME TOGGLE
+   ===================================================== */
+
+.welcome-theme-toggle {
+  position: fixed;
+
+  right: 20px;
+
+  bottom: 20px;
+
+  width: 40px;
+
+  height: 40px;
+
+  display: grid;
+
+  place-items: center;
+
+  border:
+    1px solid
+    var(--wl-border);
+
+  border-radius: 12px;
+
+  color: var(--wl-muted);
+
+  background:
+    var(--wl-surface);
+
+  box-shadow:
+    0 12px 32px
+    rgba(
+      15,
+      23,
+      42,
+      0.08
+    );
+
+  backdrop-filter: blur(16px);
+
+  cursor: pointer;
+}
+
+
+.welcome-theme-toggle:hover {
+  color: var(--wl-text);
+}
+
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
+@media (max-width: 640px) {
+  .investorlens-welcome {
+    padding:
+      72px
+      16px
+      40px;
+  }
+
+
+  .welcome-shell {
+    min-height:
+      calc(100vh - 112px);
+  }
+
+
+  .welcome-content {
+    transform:
+      translateY(-8px);
+  }
+
+
+  .welcome-content h1 {
+    font-size: 38px;
+  }
+
+
+  .welcome-subtitle {
+    margin-top: 14px;
+
+    font-size: 14px;
+  }
+
+
+  .welcome-search-wrap {
+    margin-top: 24px;
+  }
+
+
+  .welcome-search {
+    gap: 8px;
+  }
+
+
+  .welcome-search input {
+    padding-top: 14px;
+
+    padding-bottom: 14px;
+
+    font-size: 14px;
+  }
+
+
+  .welcome-search button {
+    width: 44px;
+
+    height: 44px;
+  }
+
+
+  .welcome-suggestion {
+    font-size: 10px;
+
+    padding:
+      8px
+      10px;
+  }
+
+
+  .welcome-disclaimer {
+    padding:
+      0
+      8px;
+
+    font-size: 10px;
+  }
+
+
+  .welcome-theme-toggle {
+    right: 14px;
+
+    bottom: 14px;
+  }
+}
+
+
+/* =====================================================
+   REDUCED MOTION
+   ===================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .investorlens-welcome *,
+  .investorlens-welcome *::before,
+  .investorlens-welcome *::after {
+    transition: none !important;
+  }
+}
