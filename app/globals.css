@@ -1,0 +1,66 @@
+@layer utilities {
+    .il-shimmer {
+      display: inline-block;
+  
+      /*
+       * Light mode
+       */
+      background-image: linear-gradient(
+        100deg,
+        #737985 0%,
+        #737985 38%,
+        #aeb4bf 46%,
+        #f5f6f8 50%,
+        #aeb4bf 54%,
+        #737985 62%,
+        #737985 100%
+      );
+  
+      background-size: 250% 100%;
+      background-position: 200% center;
+  
+      -webkit-background-clip: text;
+      background-clip: text;
+  
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+  
+      animation: il-shimmer-animation 2.4s linear infinite;
+    }
+  
+    /*
+     * Dark mode
+     */
+    .dark .il-shimmer {
+      background-image: linear-gradient(
+        100deg,
+        #8f96a3 0%,
+        #8f96a3 38%,
+        #bfc5ce 46%,
+        #ffffff 50%,
+        #bfc5ce 54%,
+        #8f96a3 62%,
+        #8f96a3 100%
+      );
+    }
+  
+    @keyframes il-shimmer-animation {
+      0% {
+        background-position: 200% center;
+      }
+  
+      100% {
+        background-position: -50% center;
+      }
+    }
+  
+    /*
+     * Accessibility
+     */
+    @media (prefers-reduced-motion: reduce) {
+      .il-shimmer {
+        animation: none;
+        background-position: 50% center;
+      }
+    }
+  }

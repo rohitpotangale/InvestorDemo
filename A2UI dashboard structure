@@ -1,0 +1,1000 @@
+I am going to provide you with the complete InvestorLens frontend and backend projects.
+
+DO NOT start modifying code immediately.
+
+First, deeply analyze the existing frontend + backend architecture and determine how we can make our A2UI dashboard surface dynamically composed.
+
+==================================================
+1. CURRENT OBJECTIVE
+==================================================
+
+Today our A2UI dashboard is effectively rendered using a fixed dashboard/grid arrangement, approximately a 2 × 2 layout.
+
+I want to evolve this into a dynamic A2UI dashboard where:
+
+- The backend/agent generates A2UI widgets incrementally.
+- Widgets can arrive one by one through SSE / AG-UI.
+- The frontend renders each widget immediately.
+- The dashboard automatically arranges widgets based on semantic layout metadata.
+- Different widgets can have different widths.
+- Different widgets can have different heights.
+- The layout should automatically adapt as new widgets arrive.
+- The layout must be responsive.
+- We use Tailwind CSS for styling.
+- The backend/agent must NOT generate Tailwind CSS classes.
+- The frontend should own the actual CSS/Tailwind implementation.
+- A2UI should describe semantic layout information.
+- We should avoid hardcoding a 2 × 2 dashboard.
+- We should preserve our existing A2UI architecture rather than replacing it.
+
+The target concept is:
+
+Agent
+  ↓
+A2UI messages
+  ↓
+A2UI Surface
+  ↓
+A2UI Processor
+  ↓
+A2uiCanvas
+  ↓
+Dynamic Layout Engine
+  ↓
+InvestorLens React components
+  ↓
+Tailwind CSS
+
+==================================================
+2. FIRST: UNDERSTAND THE EXISTING SYSTEM
+==================================================
+
+Before proposing changes, trace the actual implementation in both projects.
+
+Identify:
+
+FRONTEND
+
+- DashboardSection
+- A2uiCanvas
+- useA2uiProcessor
+- useAgent
+- A2UI message processing
+- A2UI surface lifecycle
+- DeferredChild / A2UI React renderer
+- A2UI catalog
+- custom components
+- current dashboard grid/layout implementation
+- dashboard CSS
+- Tailwind configuration
+- responsive breakpoints
+- streaming state
+- saved dashboard replay
+- drill-in rendering
+- currentA2uiMessages
+- a2uiSurfaces
+- loadDashboard()
+- append vs replace behavior
+- any dashboardState/report canvas state
+- any code that assumes 2 × 2, fixed columns, fixed height, fixed row height, or fixed widget ordering
+
+BACKEND
+
+Trace:
+
+User request
+  ↓
+intent / planning
+  ↓
+agent
+  ↓
+tools/data
+  ↓
+A2UI generation
+  ↓
+AG-UI / SSE
+  ↓
+frontend
+
+Identify exactly where A2UI messages are created.
+
+Find:
+
+- A2UI message models/schemas
+- surface creation
+- component creation
+- component metadata
+- catalog definitions
+- any existing layout metadata
+- any existing component properties that could support layout
+- streaming behavior
+- ordering guarantees
+- whether widgets are emitted independently or as one complete surface
+- whether backend already has concepts such as priority, component type, size, position, etc.
+
+Do not assume anything.
+
+Use the actual repository implementation.
+
+==================================================
+3. FIND THE CURRENT 2 × 2 IMPLEMENTATION
+==================================================
+
+Search the entire frontend for all code responsible for the current dashboard arrangement.
+
+Look for:
+
+- grid-cols-2
+- md:grid-cols-2
+- lg:grid-cols-2
+- grid-template-columns
+- CSS grid
+- flex layouts
+- fixed widths
+- fixed heights
+- min-height
+- height
+- row heights
+- widget containers
+- dashboard cards
+- canvas tiles
+- A2uiCanvas layout logic
+- component wrappers
+
+Identify EXACTLY where the current 2 × 2 behavior comes from.
+
+Report:
+
+File
+Component/function
+Current behavior
+Why it creates the 2 × 2 layout
+Whether it is frontend-controlled or A2UI-controlled
+
+Do not change it yet.
+
+==================================================
+4. TARGET DYNAMIC LAYOUT
+==================================================
+
+Evaluate how we can introduce a semantic layout model.
+
+I am considering a model like:
+
+type WidgetLayout = {
+  width?: 'full' | 'wide' | 'half' | 'third' | 'narrow';
+  size?: 'small' | 'medium' | 'large' | 'xlarge';
+  priority?: 'primary' | 'secondary' | 'supporting';
+};
+
+Example:
+
+{
+  "id": "monthly-inflow-chart",
+  "type": "PerformanceChart",
+  "layout": {
+    "width": "wide",
+    "size": "large",
+    "priority": "primary"
+  }
+}
+
+Another:
+
+{
+  "id": "executive-summary",
+  "type": "InsightSummary",
+  "layout": {
+    "width": "narrow",
+    "size": "small",
+    "priority": "secondary"
+  }
+}
+
+Another:
+
+{
+  "id": "client-table",
+  "type": "ClientFlowTable",
+  "layout": {
+    "width": "full",
+    "size": "large",
+    "priority": "primary"
+  }
+}
+
+IMPORTANT:
+
+This is only a proposal.
+
+Do not assume this is the correct implementation.
+
+Analyze whether A2UI v0.9/current implementation in our repository can support this cleanly.
+
+Determine whether layout metadata should be:
+
+A. A2UI component properties
+B. A2UI component metadata
+C. custom catalog component properties
+D. an InvestorLens-specific layout wrapper
+E. another approach
+
+Explain which approach fits our existing implementation best and why.
+
+==================================================
+5. DO NOT SEND TAILWIND FROM BACKEND
+==================================================
+
+This is a hard requirement.
+
+The backend/agent must NOT produce:
+
+"col-span-8"
+"lg:col-span-8"
+"min-h-[400px]"
+"grid-cols-12"
+
+or any other Tailwind/CSS class.
+
+The agent should only provide semantic information.
+
+For example:
+
+width = "wide"
+size = "large"
+
+The frontend owns the mapping:
+
+wide → appropriate Tailwind responsive classes
+large → appropriate height behavior
+
+Analyze how to implement this cleanly.
+
+==================================================
+6. WIDTH MODEL
+==================================================
+
+Analyze a 12-column logical layout.
+
+Potential semantic mapping:
+
+full    → 12
+wide    → 8
+half    → 6
+third   → 4
+narrow  → 3
+
+Potential responsive behavior:
+
+Desktop:
+12-column layout
+
+Tablet:
+6-column layout
+
+Mobile:
+1-column layout
+
+Example:
+
+Desktop:
+
+┌──────────────────────────────┬───────────┐
+│                              │           │
+│           Chart              │  Summary  │
+│          8 columns           │ 4 columns │
+│                              │           │
+└──────────────────────────────┴───────────┘
+
+Then:
+
+┌────────────────────────────────────────────┐
+│                  Table                     │
+│                 12 columns                 │
+└────────────────────────────────────────────┘
+
+Analyze whether CSS Grid is the right implementation.
+
+Compare:
+
+- CSS Grid
+- Flexbox
+- CSS masonry
+- existing dashboard tile system
+
+Do not implement masonry unless there is a strong reason.
+
+==================================================
+7. HEIGHT MODEL
+==================================================
+
+This is particularly important.
+
+Widgets will arrive independently.
+
+For example:
+
+Widget 1:
+- large chart
+- needs more vertical space
+
+Widget 2:
+- small summary
+- needs much less vertical space
+
+Widget 3:
+- table
+- needs more vertical space
+
+We do NOT want the agent to send pixel values such as:
+
+height: 437px
+
+Instead, evaluate semantic sizing:
+
+small
+medium
+large
+xlarge
+
+or another approach if you find something better.
+
+Determine:
+
+- How should height be represented in A2UI?
+- Should height be a generic layout property?
+- Should each custom component define its own natural/minimum height?
+- Should the frontend use min-height rather than fixed height?
+- How should charts calculate responsive height?
+- How should tables behave when row count changes?
+- How should text-heavy components behave?
+- How do we prevent content clipping?
+- How do we avoid huge empty spaces?
+
+IMPORTANT:
+
+Prefer natural content height + sensible min-height over hard fixed heights where appropriate.
+
+==================================================
+8. STREAMING BEHAVIOR
+==================================================
+
+This is critical.
+
+Widgets arrive incrementally.
+
+Example:
+
+First SSE/A2UI event:
+
+Chart
+
+Then:
+
+Second event:
+
+Summary
+
+Then:
+
+Third event:
+
+Table
+
+The UI should immediately render each widget.
+
+Expected evolution:
+
+Stage 1:
+
+┌──────────────────────────────┐
+│           Chart              │
+└──────────────────────────────┘
+
+Stage 2:
+
+┌──────────────────────────┬───────┐
+│          Chart           │Summary│
+└──────────────────────────┴───────┘
+
+Stage 3:
+
+┌──────────────────────────┬───────┐
+│          Chart           │Summary│
+└──────────────────────────┴───────┘
+┌──────────────────────────────────┐
+│              Table               │
+└──────────────────────────────────┘
+
+Analyze whether our existing:
+
+a2uiSurfaces
+useA2uiProcessor
+A2uiCanvas
+loadDashboard({ mode: 'append' })
+
+already supports this.
+
+Identify any problems caused by re-layout while streaming.
+
+Pay particular attention to:
+
+- React rerenders
+- surface updates
+- component IDs
+- ordering
+- layout stability
+- widget jumping
+- duplicate rendering
+- state preservation
+- chart recreation
+- scroll position
+
+==================================================
+9. LAYOUT STABILITY
+==================================================
+
+Analyze how we can prevent a bad user experience where widgets continuously jump around while SSE messages arrive.
+
+For example:
+
+If the first widget is wide and a later widget changes the composition, we need reasonable layout behavior.
+
+Evaluate:
+
+- deterministic ordering
+- priority
+- insertion order
+- layout slots
+- stable component IDs
+- avoiding unnecessary DOM reordering
+- CSS Grid auto-placement
+- whether the backend should provide an explicit order
+
+Potential metadata:
+
+{
+  "layout": {
+    "width": "wide",
+    "size": "large",
+    "priority": "primary",
+    "order": 1
+  }
+}
+
+Again, this is only a proposal.
+
+Determine whether "order" is actually necessary.
+
+==================================================
+10. COMPONENT-SPECIFIC DEFAULTS
+==================================================
+
+Analyze whether layout should have defaults based on component type.
+
+For example:
+
+PerformanceChart
+→ default width: wide
+→ default size: large
+
+ClientFlowTable
+→ default width: full
+→ default size: large
+
+InsightSummary
+→ default width: narrow
+→ default size: small
+
+AUCMetric
+→ default width: third
+→ default size: small
+
+This could allow the backend to omit layout metadata when the default is appropriate.
+
+Evaluate whether this is better than requiring the agent to specify layout on every component.
+
+==================================================
+11. A2UI CATALOG
+==================================================
+
+Analyze our existing A2UI catalog.
+
+Determine how custom InvestorLens components should expose layout capability.
+
+Potential components:
+
+InsightSummary
+ClientFlowTable
+PerformanceChart
+AUCMetric
+ComparisonChart
+ComparisonTable
+InsightCallout
+InsightAction
+
+Determine:
+
+- which are currently registered
+- how they are rendered
+- where layout information should be consumed
+- whether layout should be handled by A2uiCanvas or by individual components
+- whether a generic Layout component is appropriate
+- whether the catalog needs changes
+
+Do not create unnecessary generic components.
+
+==================================================
+12. AVOID COUPLING AGENT TO UI
+==================================================
+
+Analyze how to maintain this separation:
+
+BACKEND / AGENT:
+
+"What kind of artifact is this and how important is it?"
+
+FRONTEND:
+
+"How do we visually render that artifact?"
+
+For example:
+
+Agent:
+
+width = "wide"
+size = "large"
+
+Frontend:
+
+wide → lg:col-span-8
+large → min-height appropriate to component
+
+The agent should not know:
+
+- Tailwind
+- CSS
+- viewport width
+- exact pixels
+- browser behavior
+- responsive breakpoints
+
+==================================================
+13. RESPONSIVE DESIGN
+==================================================
+
+Analyze the existing responsive implementation.
+
+Test conceptually against:
+
+1366 × 633
+1440 × 900
+1536 × 864
+1920 × 1080
+1280 × 720
+tablet
+mobile
+
+Determine how the dynamic layout should behave.
+
+Example:
+
+Desktop:
+
+8 + 4
+
+Tablet:
+
+6 + 6
+
+Mobile:
+
+12 + 12
+
+Determine whether Tailwind's existing breakpoints are sufficient.
+
+Do not introduce custom breakpoints unless necessary.
+
+==================================================
+14. DARK MODE
+==================================================
+
+Ensure the proposed layout architecture does not break our existing:
+
+- light theme
+- dark theme
+- card styling
+- borders
+- shadows
+- chart containers
+
+Do not redesign the visual theme as part of this task.
+
+Focus on layout architecture.
+
+==================================================
+15. SAVED DASHBOARDS
+==================================================
+
+Analyze how dynamic layout metadata interacts with our saved dashboard flow.
+
+We currently persist/replay A2UI messages.
+
+Determine:
+
+- whether layout metadata will automatically persist
+- whether saved dashboards can be rendered exactly as originally generated
+- whether we need to persist separate layout state
+- whether layout should be derived entirely from A2UI messages
+- whether old saved dashboards without layout metadata will continue working
+
+Backward compatibility is important.
+
+==================================================
+16. DRILL-IN
+==================================================
+
+Analyze the existing Drill In flow.
+
+Determine whether dynamic layout can be reused for:
+
+- main dashboard
+- drill-in dashboard
+- saved dashboard
+- replayed dashboard
+
+Avoid creating separate layout implementations.
+
+Ideally:
+
+A2UI messages
+      ↓
+same processor
+      ↓
+same canvas
+      ↓
+same layout engine
+
+==================================================
+17. PERFORMANCE
+==================================================
+
+Analyze performance implications.
+
+We may have:
+
+5 widgets
+10 widgets
+20 widgets
+50 widgets
+
+Determine:
+
+- whether CSS Grid is sufficient
+- whether React memoization is needed
+- whether each widget should be independently memoized
+- whether A2uiCanvas currently rerenders too much
+- whether Chart.js components are recreated unnecessarily
+- whether layout changes cause unnecessary chart destruction/recreation
+- whether virtualization is necessary
+- whether virtualization would be premature
+
+Do not optimize prematurely.
+
+Identify actual risks in our current implementation.
+
+==================================================
+18. ERROR HANDLING / FALLBACKS
+==================================================
+
+Design safe fallbacks.
+
+If agent sends:
+
+width = "unknown"
+
+or:
+
+size = "invalid"
+
+the dashboard must NOT break.
+
+Example:
+
+unknown width → full
+unknown size → component default
+
+Also support old A2UI components with no layout metadata.
+
+Existing dashboards should continue rendering.
+
+==================================================
+19. SECURITY / TRUST
+==================================================
+
+The agent must not be able to inject arbitrary:
+
+- HTML
+- CSS
+- Tailwind classes
+- JavaScript
+- inline styles
+
+Analyze how the semantic layout model can be validated.
+
+For example:
+
+width must be one of:
+
+full | wide | half | third | narrow
+
+size must be one of:
+
+small | medium | large | xlarge
+
+Recommend where validation should happen:
+
+- backend schema
+- A2UI schema
+- frontend runtime validation
+- catalog validation
+
+==================================================
+20. IMPORTANT: CHECK ACTUAL A2UI VERSION
+==================================================
+
+Identify exactly which A2UI version the project currently uses.
+
+For example:
+
+@a2ui/react/v0_9
+
+or another version.
+
+Do not assume.
+
+Determine whether the proposed layout approach is compatible with the exact version currently installed.
+
+Also identify:
+
+- @a2ui/react version
+- @a2ui/web_core version
+- AG-UI version
+- relevant package versions
+
+If migration to another A2UI version would help, mention it separately.
+
+DO NOT migrate as part of this analysis.
+
+==================================================
+21. DO NOT REWRITE THE APPLICATION
+==================================================
+
+Do not:
+
+- replace A2UI
+- replace AG-UI
+- replace SSE
+- replace Tailwind
+- rewrite DashboardSection
+- rewrite the A2UI processor
+- introduce another state management library
+- introduce a different rendering framework
+
+Work with the architecture we already have.
+
+==================================================
+22. REQUIRED OUTPUT
+==================================================
+
+After analyzing the repositories, provide a detailed technical report.
+
+Use this exact structure:
+
+A. Current Architecture
+
+Show:
+
+Frontend
+  ↓
+AG-UI/SSE
+  ↓
+A2UI
+  ↓
+Processor
+  ↓
+Surface
+  ↓
+Canvas
+  ↓
+Renderer
+  ↓
+React component
+
+B. Current 2 × 2 Layout
+
+Give exact files and code responsible for the current layout.
+
+C. Current A2UI Flow
+
+Explain exactly how an A2UI widget reaches the browser.
+
+D. Current Streaming Flow
+
+Explain what happens when widgets arrive one by one.
+
+E. Recommended Dynamic Layout Architecture
+
+Show the proposed architecture diagram.
+
+F. Recommended Layout Contract
+
+Give the exact proposed TypeScript interface/schema.
+
+G. Width Strategy
+
+Explain the 12-column approach.
+
+H. Height Strategy
+
+Explain semantic height vs natural content height.
+
+I. Streaming/Reflow Strategy
+
+Explain how the UI should behave as widgets arrive.
+
+J. Component Defaults
+
+Recommend which components should have default widths/heights.
+
+K. Tailwind Mapping
+
+Show how semantic values map to Tailwind classes.
+
+IMPORTANT:
+Do NOT send Tailwind classes from backend.
+
+L. Responsive Strategy
+
+Explain desktop/tablet/mobile behavior.
+
+M. A2UI Catalog Changes
+
+List exact catalog changes if any.
+
+N. Backend Changes
+
+List exact backend files/functions/schemas that would need modification.
+
+O. Frontend Changes
+
+List exact frontend files/components/hooks that would need modification.
+
+P. Saved Dashboard Compatibility
+
+Explain how existing saved dashboards remain compatible.
+
+Q. Drill-In Compatibility
+
+Explain how drill-in can use the same layout system.
+
+R. Performance Considerations
+
+Identify real performance risks.
+
+S. Security/Validation
+
+Explain validation and fallback behavior.
+
+T. Migration Plan
+
+Provide a phased implementation plan.
+
+Phase 1
+Layout model
+
+Phase 2
+Frontend layout engine
+
+Phase 3
+Backend A2UI metadata
+
+Phase 4
+Streaming validation
+
+Phase 5
+Responsive behavior
+
+Phase 6
+Saved dashboard compatibility
+
+Phase 7
+Testing
+
+U. Testing Matrix
+
+Include:
+
+- 1 widget
+- 2 widgets
+- 4 widgets
+- 10 widgets
+- mixed heights
+- mixed widths
+- streaming
+- saved dashboard
+- drill-in
+- mobile
+- tablet
+- desktop
+- dark mode
+- invalid layout metadata
+- old A2UI messages without layout metadata
+
+V. Exact Files To Change
+
+Give a table:
+
+| File | Change | Reason | Risk |
+|------|--------|--------|------|
+
+W. Example End-to-End A2UI Message
+
+Show a realistic example of how the agent should describe:
+
+Chart
+Summary
+Table
+
+without sending Tailwind classes.
+
+X. Recommended Final Architecture
+
+Give one final architecture diagram.
+
+==================================================
+23. VERY IMPORTANT: ANALYSIS ONLY
+==================================================
+
+Do NOT modify files yet.
+
+Do NOT create code changes automatically.
+
+Do NOT create a PR.
+
+Do NOT refactor anything.
+
+Do NOT change the A2UI version.
+
+Do NOT change the backend.
+
+Do NOT change the frontend.
+
+First give me the analysis and implementation plan.
+
+I will review and approve the architecture before we make any changes.
+
+==================================================
+24. PRINCIPLES TO FOLLOW
+==================================================
+
+1. A2UI controls agent-generated artifacts.
+2. React controls static product UX.
+3. Backend controls semantic layout intent.
+4. Frontend controls Tailwind/CSS.
+5. Never send Tailwind classes from the agent.
+6. Prefer semantic layout values.
+7. Prefer natural content height over fixed pixel height.
+8. Use CSS Grid unless repository analysis shows a better approach.
+9. Keep layout responsive.
+10. Preserve incremental A2UI streaming.
+11. Preserve saved dashboard replay.
+12. Preserve drill-in.
+13. Preserve backward compatibility.
+14. Avoid unnecessary rewrites.
+15. Use the existing A2UI processor and canvas architecture wherever possible.
+16. Do not invent APIs; inspect the actual implementation.
+17. Do not assume a feature exists because A2UI supports it theoretically; verify it in our installed version and repository.
+18. Identify exact files and functions before proposing modifications.
+
+Start by scanning and understanding the entire frontend and backend project.
