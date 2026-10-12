@@ -1,0 +1,52 @@
+/* App shell: sidebar at left and the selected page/content at right. */
+.il-app-layout {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--app-bg, #fff);
+}
+
+/* Sidebar width is controlled by InvestorLensSidebar.css. */
+.il-app-layout > .il-sidebar {
+  position: relative;
+  z-index: 30;
+  flex: 0 0 auto;
+  height: 100%;
+  min-height: 0;
+}
+
+/* The right-side content takes all remaining width. */
+.il-app-content {
+  position: relative;
+  z-index: 0;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  width: 0;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--app-content-bg, #fff);
+}
+
+.il-app-content > * {
+  min-width: 0;
+}
+
+/* Optional class for a chat/dashboard page that manages its own scrolling. */
+.il-app-content--fixed {
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .il-app-layout {
+    height: 100dvh;
+  }
+}
