@@ -1,92 +1,17 @@
-import type {
-  CategoryCode,
-  ClientProfile,
-  ClientViewEntitlement,
-  SecureView,
-} from './clientProfiles.types';
-
-/** Build a set of known secure-view codes granted to one client. */
-export const buildEntitledViewCodeSet = (
-  entitlements: ClientViewEntitlement[],
-  clientId: string,
-  masterViewCodeSet: ReadonlySet<string>,
-): Set<string> => {
-  const entitledCodes = new Set<string>();
-  if (!clientId) return entitledCodes;
-
-  entitlements.forEach((entitlement) => {
-    if (
-      entitlement.clientId === clientId &&
-      masterViewCodeSet.has(entitlement.viewCode) &&
-      isActiveEntitlement(entitlement)
-    ) {
-      entitledCodes.add(entitlement.viewCode);
-    }
-  });
-  return entitledCodes;
-};
-
-/** Keep one entitlement per client/view pair; the last entry wins. */
-export const dedupeEntitlements = <T extends ClientViewEntitlement>(entitlements: T[]): T[] => {
-  const byKey = new Map<string, T>();
-  entitlements.forEach((entitlement) => {
-    byKey.set(`${entitlement.clientId}\u0000${entitlement.viewCode}`, entitlement);
-  });
-  return Array.from(byKey.values());
-};
-
-export const filterByCategory = <T extends Pick<SecureView, 'categoryCode'>>(
-  views: T[],
-  category: CategoryCode,
-): T[] => {
-  if (!category || category === 'ALL') return views;
-  return views.filter((view) => view.categoryCode === category);
-};
-
-export const filterClientsBySearch = <T extends ClientProfile>(
-  clients: T[],
-  search: string,
-  entitledCountByClient: Readonly<Record<string, number>>,
-): T[] => {
-  const query = normalize(search);
-  if (!query) return clients;
-  return clients.filter((client) => {
-    const count = entitledCountByClient[client.id] ?? 0;
-    const searchable = [client.name, client.code, client.segment, client.region, client.status, String(count)]
-      .map(normalize)
-      .join(' ');
-    return searchable.includes(query);
-  });
-};
-
-export const filterViewsBySearch = <T extends SecureView>(views: T[], search: string): T[] => {
-  const query = normalize(search);
-  if (!query) return views;
-  return views.filter((view) => {
-    const searchable = [view.name, view.code, view.description, view.categoryCode].map(normalize).join(' ');
-    return searchable.includes(query);
-  });
-};
-
-export const getEntitledCountByClient = (
-  entitlements: ClientViewEntitlement[],
-  masterViewCodeSet: ReadonlySet<string>,
-): Record<string, number> => {
-  const seenPairs = new Set<string>();
-  const counts: Record<string, number> = {};
-  entitlements.forEach((entitlement) => {
-    if (!masterViewCodeSet.has(entitlement.viewCode) || !isActiveEntitlement(entitlement)) return;
-    const pair = `${entitlement.clientId}\u0000${entitlement.viewCode}`;
-    if (seenPairs.has(pair)) return;
-    seenPairs.add(pair);
-    counts[entitlement.clientId] = (counts[entitlement.clientId] ?? 0) + 1;
-  });
-  return counts;
-};
-
-const isActiveEntitlement = (entitlement: ClientViewEntitlement): boolean => {
-  const status = String(entitlement.status ?? 'ACTIVE').toUpperCase();
-  return status === 'ACTIVE' || status === 'ENTITLED' || status === 'GRANTED';
-};
-
-const normalize = (value: unknown): string => String(value ?? '').trim().toLocaleLowerCase();
+import type { ClientProfile, Entitlement, SecureView } from './clientProfiles.types';
+export const isEntitled = (status: unknown) => String(status ?? '').trim().toLowerCase() === 'entitled';
+export function entitledCodes(items: Entitlement[], clientId: string) {
+  return new Set(items.filter(x => x.clientId === clientId && isEntitled(x.status)).map(x => x.viewCode));
+}
+export function countsByClient(items: Entitlement[]) {
+  const sets: Record<string, Set<string>> = {};
+  items.forEach(x => { if (isEntitled(x.status)) { (sets[x.clientId] ||= new Set()).add(x.viewCode); } });
+  const out: Record<string, number> = {}; Object.keys(sets).forEach(k => out[k] = sets[k].size); return out;
+}
+export function filterClients(clients: ClientProfile[], query: string) {
+  const q = query.trim().toLowerCase(); return clients.filter(c => !q || c.name.toLowerCase().includes(q) || c.segment.toLowerCase().includes(q));
+}
+export function filterCategory<T extends {categoryCode: string}>(items: T[], category: string) { return category === 'ALL' ? items : items.filter(x => x.categoryCode === category); }
+export function filterViews(items: SecureView[], query: string) {
+  const q = query.trim().toLowerCase(); return !q ? items : items.filter(v => v.name.toLowerCase().includes(q) || v.description.toLowerCase().includes(q) || v.categoryCode.toLowerCase().includes(q));
+}
