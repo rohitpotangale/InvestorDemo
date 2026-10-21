@@ -414,8 +414,57 @@ const ClientProfiles = () => {
         }
     }, [inProgressCount]);
 
+
+  // Show a full-screen loader on the first API call.
+  // Keep the existing UI visible during subsequent refreshes.
+  if (loading && masterViews.length === 0) {
+    return (
+      <div
+        className="cp-fullscreen-state"
+        role="status"
+        aria-live="polite"
+      >
+        <div className="cp-loading-card">
+          <span className="cp-full-spinner" aria-hidden="true" />
+
+          <h2>Loading client profiles</h2>
+
+          <p>
+            Fetching secure views and entitlement information.
+            Please wait...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // If the initial request fails, show an error instead of an empty dashboard.
+  if (error && masterViews.length === 0) {
+    return (
+      <div className="cp-fullscreen-state">
+        <div className="cp-loading-card cp-error-card">
+          <h2>Unable to load client profiles</h2>
+
+          <p>{error}</p>
+
+          <button
+            type="button"
+            className="cp-retry-button"
+            onClick={() => void refresh()}
+            disabled={loading}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+
   return (
     <><NotificationContainer />
+
+    
       <div className="client-profiles-page cp-page">
         {(loading || refreshing) && (
           <div className="cp-api-status" role="status" aria-live="polite">
