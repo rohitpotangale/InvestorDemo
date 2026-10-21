@@ -854,3 +854,221 @@
 .cp-error-card h2 {
   color: #a52e35;
 }
+
+
+/* =========================================================
+   Snowflake Monitor — viewport and independent scrolling
+   Initial estimate: 155px reserved for header, footer,
+   and shell spacing. Adjust after checking DevTools.
+   ========================================================= */
+
+   .client-profiles-page.cp-page {
+    height: calc(100dvh - 155px);
+    min-height: 0;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  
+  .client-profiles-layout.cp-layout {
+    display: grid;
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+    gap: 16px;
+  
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  /* Main content must not grow beyond the viewport. */
+  .cp-layout > main {
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  /* Three-column dashboard: sidebar + two panels.
+     Keep the existing panel appearance. */
+  .cp-columns {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 0.95fr)
+      minmax(0, 1.05fr);
+    gap: 16px;
+  
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  /* Prevent flex/grid children from expanding beyond their area. */
+  .cp-client-panel,
+  .cp-views-panel {
+    display: flex;
+    flex-direction: column;
+  
+    min-height: 0;
+    min-width: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  /* Keep headings, search boxes, filters, tabs, and panel footers
+     at their natural height. Let only the lists shrink and scroll. */
+  .cp-panel-heading,
+  .cp-panel-context-row,
+  .cp-entitlement-tabs,
+  .cp-panel-footer,
+  .cp-sidebar-heading {
+    flex-shrink: 0;
+  }
+  
+  /* The client list scrolls independently. */
+  .cp-client-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+  }
+  
+  /* Both secure-view lists scroll independently.
+     Available and entitled panel controls remain visible. */
+  .cp-view-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+  }
+  
+  /* Slim, unobtrusive scrollbars (Firefox). */
+  .cp-client-list,
+  .cp-view-list {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  
+  /* Reveal the thumb on hover or keyboard focus. */
+  .cp-client-list:hover,
+  .cp-client-list:focus-within,
+  .cp-view-list:hover,
+  .cp-view-list:focus-within {
+    scrollbar-color: #aab6c6 transparent;
+  }
+  
+  /* Slim scrollbar (Chrome, Edge, Safari). */
+  .cp-client-list::-webkit-scrollbar,
+  .cp-view-list::-webkit-scrollbar {
+    width: 5px;
+  }
+  
+  .cp-client-list::-webkit-scrollbar-track,
+  .cp-view-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .cp-client-list::-webkit-scrollbar-thumb,
+  .cp-view-list::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 999px;
+  }
+  
+  .cp-client-list:hover::-webkit-scrollbar-thumb,
+  .cp-client-list:focus-within::-webkit-scrollbar-thumb,
+  .cp-view-list:hover::-webkit-scrollbar-thumb,
+  .cp-view-list:focus-within::-webkit-scrollbar-thumb {
+    background: #aab6c6;
+  }
+  
+  .cp-client-list::-webkit-scrollbar-thumb:hover,
+  .cp-view-list::-webkit-scrollbar-thumb:hover {
+    background: #8493a8;
+  }
+  
+  /* Do not let scrolling in one list propagate to the page. */
+  .cp-client-list,
+  .cp-view-list {
+    overscroll-behavior: contain;
+  }
+  
+  /* Keep long view names/descriptions from widening the panels. */
+  .cp-view-copy {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  
+  .cp-view-copy strong,
+  .cp-view-copy small {
+    overflow-wrap: anywhere;
+  }
+  
+  /* Smaller desktop and tablet widths. */
+  @media (max-width: 1100px) {
+    .client-profiles-layout.cp-layout {
+      grid-template-columns: minmax(190px, 230px) minmax(0, 1fr);
+      gap: 12px;
+    }
+  
+    .cp-columns {
+      gap: 12px;
+    }
+  }
+  
+  /* Shorter screens: use more room for the lists by reducing gaps.
+     Keep the three sections visible side by side. */
+  @media (max-height: 750px) {
+    .client-profiles-layout.cp-layout,
+    .cp-columns {
+      gap: 10px;
+    }
+  
+    .cp-panel-heading {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+  }
+  
+  /* On narrow screens, stack the panels and allow the dashboard
+     content to scroll vertically instead of squeezing columns. */
+  @media (max-width: 760px) {
+    .client-profiles-page.cp-page {
+      height: calc(100dvh - 155px);
+      overflow: auto;
+    }
+  
+    .client-profiles-layout.cp-layout {
+      display: flex;
+      flex-direction: column;
+      height: auto;
+      min-height: 100%;
+      overflow: visible;
+    }
+  
+    .cp-client-panel {
+      height: 240px;
+      flex: 0 0 240px;
+    }
+  
+    .cp-layout > main {
+      height: auto;
+      min-height: 0;
+      overflow: visible;
+    }
+  
+    .cp-columns {
+      display: flex;
+      flex-direction: column;
+      height: auto;
+      overflow: visible;
+    }
+  
+    .cp-views-panel {
+      height: 360px;
+      flex: 0 0 360px;
+    }
+  }
+  
