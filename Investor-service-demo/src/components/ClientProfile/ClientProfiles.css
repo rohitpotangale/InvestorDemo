@@ -1072,3 +1072,54 @@
     }
   }
   
+
+
+/* =========================================
+   Minimal, ChatGPT-style scrollbars
+   ========================================= */
+
+/* Apply to all three independent scroll areas */
+.cp-client-list,
+.cp-view-list {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+/* Chrome, Edge and Safari */
+.cp-client-list::-webkit-scrollbar,
+.cp-view-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.cp-client-list::-webkit-scrollbar-track,
+.cp-view-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cp-client-list::-webkit-scrollbar-thumb,
+.cp-view-list::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 10px;
+}
+
+/* Reveal the scrollbar only when hovering over that section */
+.cp-client-list:hover,
+.cp-view-list:hover {
+  scrollbar-color: #aab6c6 transparent;
+}
+
+.cp-client-list:hover::-webkit-scrollbar-thumb,
+.cp-view-list:hover::-webkit-scrollbar-thumb {
+  background-color: #aab6c6;
+}
+
+.cp-client-list::-webkit-scrollbar-thumb:hover,
+.cp-view-list::-webkit-scrollbar-thumb:hover {
+  background-color: #8291a6;
+}
