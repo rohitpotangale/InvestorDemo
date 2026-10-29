@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="#eaf1fc" name="theme-color"/><title>InvestorLens — 16 Dashboard Design Concepts</title>
+<style>
+
+  :root{
+    --bg:#eaf1fc; --panel:#edf3fd; --ink:#101a3b; --muted:#6279a8;
+    --blue:#3485ff; --green:#35c99a; --purple:#9b70ff; --orange:#ffad50; --pink:#f58bc0;
+    --shadow: 10px 10px 24px rgba(130,157,199,.22), -10px -10px 24px rgba(255,255,255,.92);
+    --shadow-sm: 5px 5px 12px rgba(130,157,199,.2), -5px -5px 12px rgba(255,255,255,.92);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(135deg,#e8effb,#edf4ff 55%,#e3edfc);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);min-height:100vh}
+  .dashboard{max-width:1600px;margin:auto;padding:28px;display:grid;gap:22px}
+  .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+  .card{background:rgba(237,243,253,.86);border:1px solid rgba(255,255,255,.92);border-radius:25px;box-shadow:var(--shadow);min-width:0}
+  .kpi{padding:22px;min-height:160px;display:grid;grid-template-columns:auto 1fr;gap:15px;align-items:start;position:relative;overflow:hidden;transition:transform .25s ease,box-shadow .25s ease}
+  .kpi:hover,.panel:hover{transform:translateY(-3px);box-shadow:14px 14px 28px rgba(130,157,199,.23),-10px -10px 24px rgba(255,255,255,.96)}
+  .icon{width:60px;height:60px;border-radius:20px;display:grid;place-items:center;box-shadow:var(--shadow-sm);font-size:26px;font-weight:700}
+  .blue{color:var(--blue);background:#dceaff}.green{color:#0bb884;background:#d9f7ed}.purple{color:#8958fa;background:#e9e0ff}.orange{color:#e88a16;background:#ffecd6}
+  .kpi-label{font-size:15px;color:#344b7d;margin:8px 0 8px}.kpi-value{font-size:clamp(23px,2vw,31px);font-weight:800;letter-spacing:-.7px;margin:0 0 10px;white-space:nowrap}
+  .trend{font-size:13px;font-weight:700;border-radius:999px;padding:6px 10px;display:inline-flex;gap:5px;align-items:center}
+  .down{color:#f0445b;background:#ffe2e8}.up{color:#079f70;background:#d7f8e9}.vs{font-size:12px;color:var(--muted);margin-left:7px;font-weight:400}
+  .spark{position:absolute;right:18px;top:55px;width:78px;height:50px;opacity:.95}
+  .middle{display:grid;grid-template-columns:1.42fr 1fr;gap:22px}
+  .panel{padding:22px;border-radius:25px;transition:transform .25s ease,box-shadow .25s ease;min-width:0}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+  .heading{display:flex;align-items:center;gap:13px;font-size:19px;font-weight:750;letter-spacing:-.3px}
+  .heading .icon{width:44px;height:44px;border-radius:15px;font-size:22px;flex-shrink:0}
+  .select{border:1px solid rgba(255,255,255,.9);background:var(--panel);box-shadow:var(--shadow-sm);border-radius:16px;padding:12px 15px;color:var(--ink);font:inherit;font-size:13px;outline:none;cursor:pointer}
+  .chart{width:100%;height:auto;display:block;overflow:visible}
+  .chart text{font-family:inherit;fill:var(--muted);font-size:12px}
+  .legend{display:flex;justify-content:center;gap:22px;margin-top:12px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+  .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:7px;vertical-align:-1px}
+  .projects-content{display:grid;grid-template-columns: minmax(160px,.85fr) 1fr;align-items:center;gap:24px;padding:10px 0}
+  .donut{width:min(100%,240px);aspect-ratio:1;border-radius:50%;margin:auto;position:relative;filter:drop-shadow(4px 7px 8px rgba(95,135,190,.14))}
+  .donut:before{content:"";position:absolute;inset:20%;border-radius:50%;background:var(--panel);box-shadow:inset 5px 5px 12px rgba(130,157,199,.15),inset -5px -5px 12px rgba(255,255,255,.9)}
+  .donut-center{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none}
+  .donut-center strong{font-size:30px;letter-spacing:-1px}.donut-center span{color:var(--muted);font-size:13px;margin-top:4px}
+  .status-list{display:grid;gap:0}.status{display:grid;grid-template-columns:18px 1fr auto auto;gap:12px;align-items:center;padding:17px 0;border-bottom:1px solid rgba(255,255,255,.8);font-size:14px}.status:last-child{border:0}
+  .status .dot{width:17px;height:17px;margin:0;box-shadow:2px 3px 6px rgba(80,100,150,.18)}.status b{font-size:15px}.percent{color:var(--muted);min-width:38px;text-align:right}
+  .bottom{display:grid;grid-template-columns:1.55fr .85fr 1fr;gap:22px}
+  .gantt-wrap{overflow-x:auto;border-radius:14px}
+  .gantt{width:100%;min-width:520px;border-collapse:collapse;font-size:12px;color:#526a9b}
+  .gantt th,.gantt td{border:1px solid rgba(194,211,239,.42);height:50px;padding:8px 10px;text-align:center;font-weight:500;white-space:nowrap}
+  .gantt th:first-child,.gantt td:first-child{text-align:left;min-width:130px}
+  .gantt th{font-size:11px;color:#5b75a7;background:rgba(255,255,255,.16)}
+  .bar-track{height:20px;background:rgba(190,208,237,.48);border-radius:99px;position:relative;min-width:80px}
+  .bar{height:100%;border-radius:99px;position:relative;box-shadow:0 4px 10px rgba(68,126,204,.15);animation:grow .9s ease both}
+  .bar:after{content:"";position:absolute;right:2px;top:3px;width:14px;height:14px;border-radius:50%;background:#f5f8ff;box-shadow:0 1px 4px #9aafd0}
+  @keyframes grow{from{width:0;opacity:.4}to{opacity:1}}
+  .categories .donut{width:min(100%,200px);margin:10px auto 20px}
+  .category-legend{display:grid;grid-template-columns:1fr 1fr;gap:14px 10px;font-size:12px;color:#314b7d}
+  .category-legend span{white-space:nowrap}
+  .activity{display:grid;gap:0}
+  .activity-row{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.8)}
+  .activity-row:last-child{border:0}.activity .icon{width:46px;height:46px;border-radius:50%;font-size:20px}
+  .activity strong{display:block;font-size:13px;margin-bottom:5px}.activity small{display:block;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+  .time{font-size:11px;color:var(--muted);align-self:start;padding-top:4px;white-space:nowrap}
+  @media(max-width:1100px){.dashboard{padding:20px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.middle{grid-template-columns:1fr}.bottom{grid-template-columns:1fr 1fr}.gantt-panel{grid-column:1/-1}}
+  @media(max-width:650px){.dashboard{padding:14px;gap:16px}.kpis{gap:14px}.kpi{padding:15px;min-height:145px;grid-template-columns:1fr;gap:8px;border-radius:20px}.kpi .icon{width:43px;height:43px;border-radius:14px;font-size:21px}.kpi-label{font-size:12px;margin:0 0 7px}.kpi-value{font-size:22px}.spark{width:55px;right:12px;top:20px}.trend{font-size:11px;padding:5px 7px}.vs{display:none}.panel{padding:16px;border-radius:20px}.heading{font-size:16px;gap:9px}.heading .icon{width:38px;height:38px}.panel-head{align-items:flex-start}.select{padding:9px 10px;font-size:11px;max-width:130px}.projects-content{grid-template-columns:1fr;gap:18px}.projects-content .donut{width:190px}.status{padding:12px 0;font-size:13px}.bottom{grid-template-columns:1fr}.gantt-panel{grid-column:auto}.categories .donut{width:180px}.activity-row{grid-template-columns:42px 1fr auto;gap:9px}.activity .icon{width:40px;height:40px}.chart text{font-size:10px}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+
+*{box-sizing:border-box}
+body{background:#eaf1fc}
+.app-shell{max-width:1660px;margin:0 auto;padding:8px 22px 0}
+.actionbar{display:flex;justify-content:flex-end;align-items:center;gap:10px;height:44px;margin-bottom:7px}
+.actionbar button{cursor:pointer;border:1px solid rgba(255,255,255,.95);background:#edf3fd;color:#263958;box-shadow:5px 5px 12px rgba(130,157,199,.18),-5px -5px 12px #fff;border-radius:13px;padding:9px 17px;font-size:12px;font-weight:800}
+.actionbar #shareBtn{background:#3485ff;color:#fff;border-color:#3485ff;box-shadow:0 7px 18px #3485ff35}
+.tabs{display:flex;gap:7px;overflow-x:auto;padding:8px 3px 15px;position:sticky;top:0;z-index:30;background:rgba(234,241,252,.93);backdrop-filter:blur(14px);scrollbar-width:thin}
+.tabs button{flex:0 0 auto;cursor:pointer;border:1px solid rgba(255,255,255,.96);background:#edf3fd;color:#63769b;box-shadow:4px 4px 10px rgba(130,157,199,.15),-4px -4px 10px #fff;border-radius:12px;padding:10px 13px;font-size:11px;font-weight:850;white-space:nowrap;transition:transform .2s,background .2s,color .2s}
+.tabs button.active{background:#3485ff;color:#fff;border-color:#3485ff;box-shadow:0 6px 14px #3485ff38}
+.tabs button:hover{transform:translateY(-1px)}
+.concept-view{display:none;animation:softIn .32s ease both}
+.concept-view.active{display:block}
+@keyframes softIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,12px);opacity:0;pointer-events:none;padding:11px 15px;background:#17213d;color:white;border-radius:12px;font-size:12px;font-weight:750;box-shadow:0 10px 24px #17213d30;z-index:100;transition:.22s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+/* Shared cool-blue InvestorLens palette for all concepts. Each style changes layout, hierarchy and visualization—not the palette. */
+.v-wrap{--bgv:#edf3fd;--white:#fff;--inkv:#15213d;--mutedv:#687b9f;--linev:#dfe8f7;--bluev:#3485ff;--greenv:#35c99a;--orangev:#ffad50;--pinkv:#f58bc0;--purplev:#9b70ff;background:var(--bgv);color:var(--inkv);padding:22px;border-radius:25px;min-height:calc(100vh - 128px);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;transition:background .25s}
+.v-head{display:flex;justify-content:space-between;align-items:center;gap:13px;margin-bottom:17px}
+.v-title{font-size:15px;font-weight:850;letter-spacing:-.3px;margin:0}
+.v-sub{font-size:10px;color:var(--mutedv);line-height:1.55;margin-top:5px}
+.v-label{font-size:9px;letter-spacing:1.25px;text-transform:uppercase;font-weight:900;color:var(--mutedv)}
+.v-card{background:var(--white);border:1px solid rgba(255,255,255,.95);border-radius:19px;padding:19px;min-width:0;box-shadow:0 10px 28px rgba(68,100,155,.075)}
+.v-grid{display:grid;gap:15px}
+.v-num{font-size:clamp(24px,2.6vw,36px);font-weight:850;letter-spacing:-1.4px;line-height:1.05;margin:10px 0 7px}
+.v-change{font-size:10px;font-weight:850;color:#139c72}
+.v-muted{color:var(--mutedv);font-size:10px}
+.v-pill{display:inline-flex;align-items:center;padding:6px 9px;border-radius:9px;background:#ddf8ee;color:#128660;font-size:9px;font-weight:850;white-space:nowrap}
+.v-chart{display:block;width:100%;height:auto;overflow:visible}
+.v-chart text{font-family:inherit;font-size:10px;fill:var(--mutedv)}
+.v-gridline{stroke:var(--linev);stroke-width:1}
+.v-table{border-collapse:collapse;width:100%;font-size:10px}
+.v-table th,.v-table td{padding:12px 9px;border-bottom:1px solid var(--linev);text-align:left;white-space:nowrap}
+.v-table th{font-size:9px;text-transform:uppercase;letter-spacing:.55px;color:var(--mutedv)}
+.v-table tr:last-child td{border-bottom:0}
+.v-bar{height:7px;border-radius:99px;background:#e7eefb;overflow:hidden}.v-bar span{height:100%;display:block;border-radius:99px;background:var(--bluev)}
+.v-spark{display:block;width:100%;height:35px}
+.v-paragraph{font-size:11px;line-height:1.7;color:var(--mutedv);margin:9px 0 0}
+.v-statrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--linev);font-size:11px}
+.v-statrow:last-child{border-bottom:0}
+.v-statrow span{color:var(--mutedv);font-size:10px}
+.v-divider{height:1px;background:var(--linev);margin:14px 0}
+.v-legend{display:flex;flex-wrap:wrap;gap:14px;font-size:10px;color:var(--mutedv);margin-top:12px}
+.v-legend i{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
+/* 02 Skeuomorphism: tactile instrument layout; preserve the original cool blue palette */
+.style-skeuo{--bgv:#e8effb}
+.style-skeuo .v-card{border:1px solid #fff;box-shadow:inset 1px 1px 0 #fff,6px 8px 14px #aebfda7a,-5px -5px 10px #fff}
+.style-skeuo .instrument{background:linear-gradient(145deg,#f9fbff,#e8effb);border-radius:16px}
+.style-skeuo .knob{background:linear-gradient(145deg,#fff,#dbe5f5);box-shadow:inset 2px 2px 5px #b8c6de,5px 5px 10px #afc0da; border:1px solid white}
+/* 03 Glassmorphism: translucent light glass, not a dark recolor */
+.style-glass{background:radial-gradient(ellipse at 10% 4%,#d6e5ff 0,transparent 35%),radial-gradient(ellipse at 95% 10%,#d7f7f0 0,transparent 31%),#eaf1fc}
+.style-glass .v-card{background:rgba(255,255,255,.64);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.94);box-shadow:0 16px 40px rgba(101,131,184,.13)}
+.style-glass .glass-hero{background:linear-gradient(120deg,rgba(255,255,255,.78),rgba(226,237,255,.65));border:1px solid white}
+/* 04 Claymorphism: soft inflated surfaces, same pastel colors */
+.style-clay .v-card{border:0;border-radius:26px;box-shadow:9px 10px 20px #bdcce4a0,-9px -9px 20px #fff}
+.style-clay .clay-icon{border-radius:18px;background:linear-gradient(145deg,#f9fbff,#e2ebfc);box-shadow:inset 2px 2px 5px #fff,5px 6px 11px #bdcce4;color:#3485ff}
+/* 05 Brutalism: strong hierarchy, bold outlines, but retain InvestorLens colors */
+.style-brutal .v-card{border:2px solid #233451;border-radius:4px;box-shadow:5px 5px 0 #c2d2ed}
+.style-brutal .brutal-hero{background:#dce8ff;border:2px solid #233451;border-radius:4px}
+.style-brutal .v-title,.style-brutal .v-num{font-weight:950}
+/* 06 Minimalism: quiet flat layers and typography-first placement */
+.style-minimal{--bgv:#f6f8fc}
+.style-minimal .v-card{box-shadow:none;border:1px solid #e7ebf3;border-radius:12px}
+.style-minimal .v-num{font-weight:750}
+.style-minimal .v-head{margin-bottom:23px}
+/* 07 Maximalism: varied block sizes and a dynamic editorial collage in the same palette */
+.style-maximal .v-card{border:1px solid #fff;border-radius:25px;box-shadow:0 12px 25px #7f9ec61c}
+.style-maximal .max-hero{background:linear-gradient(120deg,#dce8ff,#f8fbff);border-radius:27px}
+.style-maximal .max-number{font-size:clamp(35px,5vw,64px);letter-spacing:-3px;font-weight:950}
+.style-maximal .max-mosaic{display:grid;grid-template-columns:1.2fr .8fr;grid-template-rows:auto auto;gap:12px}
+/* 08 Liquid glass: fluid curves, glowing edges, translucent blue-white layers */
+.style-liquid{background:linear-gradient(140deg,#e7f0ff,#f1f7ff 54%,#dff5f4)}
+.style-liquid .v-card{background:linear-gradient(140deg,rgba(255,255,255,.92),rgba(231,241,255,.72));border:1px solid white;border-radius:27px 21px 29px 22px;box-shadow:inset 1px 1px 0 white,0 15px 30px #8aa9d52c}
+.style-liquid .liquid-orb{border-radius:42% 58% 63% 37% / 44% 39% 61% 56%;background:linear-gradient(130deg,#bcd1ff,#e6f6ff 50%,#c5f4e8);box-shadow:inset 4px 4px 13px #ffffffd9,7px 10px 18px #8aa9d548}
+/* 09 Spatial UI: layered floating panels and orbital relationships */
+.style-spatial .v-card{box-shadow:0 18px 26px #7189b51d,0 3px 0 #fff;transform:perspective(900px) rotateX(.6deg)}
+.style-spatial .spatial-node{box-shadow:0 12px 20px #a5b8d94a,0 1px 0 white}
+.style-spatial .spatial-center{background:linear-gradient(145deg,#dce8ff,#f8fbff);box-shadow:0 0 0 10px #dce8ff88,0 18px 35px #8aa4d566}
+/* 10–16 are data-story / visualization layouts, using the same cool palette */
+.style-story .story-lead{background:linear-gradient(125deg,#e1eaff,#fafdff);border-radius:22px}
+.style-story .story-lead h2{font-size:clamp(25px,3.5vw,40px);line-height:1.13;letter-spacing:-1.4px;margin:14px 0}
+.style-timeseries .v-card{border-radius:22px}
+.style-timeseries .timeseries-hero{background:#e1eaff;border:1px solid #fff}
+.style-timeseries .range-pill{border:1px solid #d8e4f8;border-radius:9px;background:#f7faff;padding:7px 10px;font-size:10px;color:#5c7097}
+.style-waterfall .bridgebar{border-radius:7px 7px 2px 2px}
+.style-treemap .treebox{padding:17px;border-radius:15px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;min-height:130px}
+.style-treemap .treebox strong{font-size:clamp(20px,2.4vw,34px);letter-spacing:-1px}
+.style-funnel .funnelstep{height:50px;margin-inline:auto;border-radius:11px;display:flex;align-items:center;justify-content:space-between;padding:0 15px;color:#fff;font-size:11px;font-weight:800;box-shadow:0 7px 15px #6084bd21}
+.style-correlation .matrix{border-spacing:5px;border-collapse:separate;width:100%;min-width:410px}
+.style-correlation .matrix td,.style-correlation .matrix th{padding:12px 6px;text-align:center;border-radius:8px;font-size:10px}
+.style-correlation .matrix th{color:var(--mutedv)}
+.style-risk .riskcell{height:35px;border-radius:6px;background:#d9f3e9;border:1px solid white}
+.style-risk .riskcell:nth-child(3n){background:#fff0d6}.style-risk .riskcell:nth-child(4n),.style-risk .riskcell:nth-child(19){background:#ffdfe7}
+.style-table .v-table tbody tr:hover{background:#f5f8ff}
+.style-table .ticker{width:29px;height:29px;border-radius:9px;background:#e5edff;color:#3485ff;display:grid;place-items:center;font-weight:900}
+@media(max-width:1100px){.v-grid.two{grid-template-columns:1fr!important}.v-grid.three{grid-template-columns:repeat(2,minmax(0,1fr))!important}.v-grid.four{grid-template-columns:repeat(2,minmax(0,1fr))!important}.style-maximal .max-mosaic{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){.app-shell{padding:7px 10px 0}.actionbar button{padding:9px 13px}.tabs{margin:0 -2px}.tabs button{padding:9px 11px}.v-wrap{padding:12px;border-radius:17px}.v-card{padding:14px;border-radius:15px}.v-title{font-size:13px}.v-head{align-items:flex-start}.v-grid.three,.v-grid.four{grid-template-columns:1fr!important}.v-grid.two{grid-template-columns:1fr!important}.style-maximal .max-mosaic{grid-template-columns:1fr}.style-liquid .v-card{border-radius:18px}.style-spatial .spatial-node{padding:9px}.story-steps{grid-template-columns:1fr 1fr!important}.table-scroll{overflow:auto}.v-table{min-width:630px}.ts-number{font-size:42px!important}.v-paragraph{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.concept-view,.v-card,.tabs button{animation:none!important;transition:none!important}}
+
+
+/* Consistent content suite present in every concept so users can compare all data components */
+.complete-suite{--suite-bg:var(--bgv,#edf3fd);--suite-card:#fff;--suite-text:var(--inkv,#15213d);--suite-muted:var(--mutedv,#687b9f);--suite-line:var(--linev,#dfe8f7);--suite-accent:var(--bluev,#3485ff);margin-top:20px;padding:20px;border-radius:24px;background:var(--suite-bg);color:var(--suite-text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.suite-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}
+.suite-heading h2{font-size:16px;margin:0;font-weight:850;letter-spacing:-.35px}
+.suite-heading p{font-size:10px;color:var(--suite-muted);margin:5px 0 0}
+.suite-grid{display:grid;gap:13px}.suite-two{grid-template-columns:1.1fr .9fr}.suite-four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.suite-card{min-width:0;background:var(--suite-card);color:var(--suite-text);border:1px solid rgba(255,255,255,.96);border-radius:18px;padding:17px;box-shadow:0 10px 25px rgba(76,105,152,.07)}
+.suite-card h3{font-size:12px;margin:0;font-weight:850}.suite-sub{font-size:10px;color:var(--suite-muted);margin-top:5px;line-height:1.5}
+.suite-summary{font-size:11px;line-height:1.7;color:var(--suite-muted);margin:10px 0 0}
+.suite-bullets{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:8px}
+.suite-bullets li{font-size:10px;line-height:1.5;display:flex;gap:8px;align-items:flex-start;color:var(--suite-text)}
+.suite-bullets li:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--suite-accent);margin-top:5px;flex-shrink:0}
+.suite-metric{padding:16px;position:relative;overflow:hidden}
+.suite-metric-top{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:10px;color:var(--suite-muted)}
+.suite-metric-icon{width:28px;height:28px;border-radius:9px;background:color-mix(in srgb,var(--suite-accent) 12%,var(--suite-card));color:var(--suite-accent);display:grid;place-items:center;font-size:13px}
+.suite-metric-value{font-size:clamp(22px,2.3vw,31px);font-weight:850;letter-spacing:-1.2px;margin:10px 0 7px;white-space:nowrap}
+.suite-metric-foot{font-size:9px;color:var(--suite-muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.suite-positive{color:#149b73;font-weight:850}.suite-warning{color:#b77b20;font-weight:850}.suite-negative{color:#d45d7a;font-weight:850}
+.suite-spark{width:65px;height:25px;margin-left:auto;flex-shrink:0}
+.suite-panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px}
+.suite-chart{width:100%;height:auto;display:block;overflow:visible}
+.suite-chart text{font-family:inherit;fill:var(--suite-muted);font-size:9px}
+.suite-chart .line-grid{stroke:var(--suite-line);stroke-width:1}
+.suite-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:9px;color:var(--suite-muted);margin-top:10px}
+.suite-legend i{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px}
+.suite-bars{display:grid;gap:15px;padding:4px 0}
+.suite-bar-row{display:grid;grid-template-columns:88px 1fr 38px;align-items:center;gap:8px;font-size:10px}
+.suite-track{height:9px;background:var(--suite-line);border-radius:99px;overflow:hidden}
+.suite-track span{height:100%;display:block;border-radius:99px;background:var(--suite-accent)}
+.suite-table-wrap{overflow:auto}
+.suite-table{border-collapse:collapse;width:100%;font-size:10px}
+.suite-table th,.suite-table td{padding:11px 9px;border-bottom:1px solid var(--suite-line);text-align:left;white-space:nowrap}
+.suite-table th{font-size:8px;letter-spacing:.8px;text-transform:uppercase;color:var(--suite-muted);font-weight:850}
+.suite-table tr:last-child td{border-bottom:0}
+.suite-status{display:inline-block;padding:5px 7px;border-radius:7px;background:#ddf8ee;color:#128660;font-size:8px;font-weight:900}
+.suite-status.watch{background:#fff0d8;color:#a26b1b}
+.suite-note-row{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px}
+.suite-note-row p{font-size:10px;line-height:1.7;color:var(--suite-muted);margin:8px 0 0}
+.suite-callout{border-left:3px solid var(--suite-accent);padding:4px 0 4px 12px}
+.neumo-suite{background:#eaf1fc}
+.neumo-suite .suite-card{background:#edf3fd;border:1px solid rgba(255,255,255,.95);border-radius:22px;box-shadow:8px 8px 20px rgba(130,157,199,.19),-8px -8px 20px rgba(255,255,255,.92)}
+/* Theme treatment applies to the whole comparable summary/KPI/chart/table suite */
+.style-skeuo .suite-card{background:linear-gradient(145deg,#f9fbff,#e7eefb);border:1px solid white;box-shadow:inset 1px 1px 0 white,6px 7px 13px #b2c3dc88,-4px -4px 9px #fff}
+.style-glass .suite-card{background:rgba(255,255,255,.65);backdrop-filter:blur(16px);border:1px solid white;box-shadow:0 14px 32px #86a4d525}
+.style-clay .suite-card{border:0;border-radius:25px;box-shadow:9px 9px 18px #c1d0e8a3,-8px -8px 18px #fff}
+.style-brutal .suite-card{border:2px solid #24344f;border-radius:4px;box-shadow:4px 4px 0 #c4d3ec}
+.style-minimal .suite-card{border:1px solid #e6ebf3;border-radius:12px;box-shadow:none}
+.style-maximal .suite-metric:nth-child(2){background:#e0f8ef}.style-maximal .suite-metric:nth-child(3){background:#eae4ff}.style-maximal .suite-metric:nth-child(4){background:#fff0d8}
+.style-liquid .suite-card{background:linear-gradient(140deg,rgba(255,255,255,.94),rgba(230,241,255,.76));border:1px solid white;border-radius:25px 19px 27px 21px;box-shadow:inset 1px 1px 0 white,0 14px 28px #8aa9d52b}
+.style-spatial .suite-card{box-shadow:0 14px 25px #8099c02b,0 2px 0 #fff;transform:perspective(900px) rotateX(.5deg)}
+.style-risk .suite-card{background:#1c2434;border-color:#303a4e;color:#eef2fa}
+@media(max-width:1000px){.suite-two{grid-template-columns:1fr}.suite-four{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.complete-suite{padding:12px;border-radius:17px;margin-top:14px}.suite-card{padding:13px;border-radius:15px}.suite-heading{align-items:flex-start}.suite-four{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.suite-metric{padding:12px}.suite-metric-value{font-size:23px}.suite-spark{width:47px}.suite-two{grid-template-columns:1fr}.suite-note-row{grid-template-columns:1fr}.suite-table{min-width:580px}}
+
+
+/* Explicit tab visibility: exactly one dashboard panel is visible at a time. */
+section.concept-view[hidden]{display:none!important}
+section.concept-view.active:not([hidden]){display:block!important}
+
+
+/* Per-concept analytics extensions: no copied Neumorphism card group in alternatives. */
+.concept-extension{margin-top:17px}
+.ext-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:13px}
+.ext-head h3{font-size:14px;font-weight:850;letter-spacing:-.25px;margin:0}
+.ext-head p{font-size:10px;color:var(--mutedv,#687b9f);line-height:1.6;margin:5px 0 0}
+.ext-grid{display:grid;gap:13px}
+.ext-two{grid-template-columns:1.1fr .9fr}
+.ext-three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ext-panel{min-width:0;padding:17px;border-radius:18px;background:#fff;border:1px solid rgba(255,255,255,.95);box-shadow:0 8px 24px rgba(80,110,160,.07);color:#15213d}
+.ext-label{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:#7484a4}
+.ext-value{font-size:clamp(20px,2.3vw,30px);font-weight:850;letter-spacing:-1.1px;margin:8px 0 5px}
+.ext-copy{font-size:10px;line-height:1.7;color:#71809d;margin:8px 0 0}
+.ext-bullets{padding:0;margin:10px 0 0;list-style:none;display:grid;gap:7px}
+.ext-bullets li{font-size:10px;line-height:1.55;display:flex;gap:8px;color:#243653}
+.ext-bullets li:before{content:"";width:6px;height:6px;border-radius:50%;background:#3485ff;margin-top:4px;flex-shrink:0}
+.ext-table-scroll{overflow:auto}
+.ext-table{border-collapse:collapse;width:100%;font-size:10px}
+.ext-table th,.ext-table td{padding:10px 8px;border-bottom:1px solid #e4ebf7;text-align:left;white-space:nowrap}
+.ext-table th{font-size:8px;text-transform:uppercase;letter-spacing:.7px;color:#7586a5}
+.ext-table tr:last-child td{border-bottom:0}
+.ext-series{width:100%;height:auto;display:block}
+.ext-series text{font-family:inherit;font-size:9px;fill:#7586a5}
+.ext-series .gridline{stroke:#e2eaf7;stroke-width:1}
+.ext-chip{display:inline-block;padding:5px 8px;border-radius:7px;background:#e2f8ef;color:#148965;font-size:8px;font-weight:900;white-space:nowrap}
+.ext-chip.watch{background:#fff0d8;color:#a66b18}
+.ext-table-note{font-size:9px;color:#7c8aa5;line-height:1.6;margin-top:10px}
+.ext-line{height:1px;background:#e4ebf7;margin:12px 0}
+.ext-bar{height:7px;background:#e7eefb;border-radius:99px;overflow:hidden}
+.ext-bar span{display:block;height:100%;background:#3485ff;border-radius:99px}
+.ext-kpi-inline{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #e4ebf7}
+.ext-kpi-inline:last-child{border-bottom:0}
+.ext-kpi-inline span{font-size:10px;color:#71809d}
+.ext-kpi-inline b{font-size:12px}
+.ext-number-band{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:14px 0}
+.ext-number-band div{min-width:90px}.ext-number-band strong{display:block;font-size:20px;letter-spacing:-.8px}.ext-number-band small{font-size:9px;color:#7586a5}
+.ext-summary-ribbon{padding:15px 17px;border-radius:14px;background:#e4edff;border-left:3px solid #3485ff;font-size:11px;line-height:1.7;color:#314869}
+.ext-matrix{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:12px}.ext-matrix span{height:20px;border-radius:4px;background:#dce7fc}.ext-matrix span:nth-child(3n){background:#b6caff}.ext-matrix span:nth-child(4n){background:#819fff}.ext-matrix span:nth-child(7n){background:#3485ff}
+.ext-treemap{display:grid;grid-template-columns:1.1fr .9fr;grid-template-rows:90px 75px;gap:7px;margin-top:10px}.ext-treemap div{border-radius:10px;padding:10px;color:white;display:flex;flex-direction:column;justify-content:space-between;font-size:9px}.ext-treemap strong{font-size:19px}
+.ext-rankbar{display:grid;grid-template-columns:80px 1fr 34px;gap:8px;align-items:center;font-size:9px;margin:12px 0}.ext-rankbar .track{height:7px;border-radius:99px;background:#e4ebf7;overflow:hidden}.ext-rankbar .track span{display:block;height:100%;border-radius:99px;background:#3485ff}
+.style-skeuo .concept-extension .ext-panel{background:linear-gradient(145deg,#f9fbff,#e7eefb);border:1px solid white;box-shadow:inset 1px 1px 0 white,6px 7px 13px #b2c3dc88,-4px -4px 9px #fff;border-radius:15px}
+.style-glass .concept-extension .ext-panel{background:rgba(255,255,255,.65);backdrop-filter:blur(16px);border:1px solid white;box-shadow:0 14px 32px #86a4d525}
+.style-clay .concept-extension .ext-panel{border:0;border-radius:25px;box-shadow:9px 9px 18px #c1d0e8a3,-8px -8px 18px #fff}
+.style-brutal .concept-extension .ext-panel{border:2px solid #24344f;border-radius:4px;box-shadow:4px 4px 0 #c4d3ec}
+.style-minimal .concept-extension .ext-panel{border:1px solid #e6ebf3;border-radius:10px;box-shadow:none}
+.style-maximal .concept-extension .ext-panel:nth-child(2){background:#e5f8ef}.style-maximal .concept-extension .ext-panel:nth-child(3){background:#f1eaff}
+.style-liquid .concept-extension .ext-panel{background:linear-gradient(140deg,rgba(255,255,255,.94),rgba(230,241,255,.76));border:1px solid white;border-radius:25px 19px 27px 21px;box-shadow:inset 1px 1px 0 white,0 14px 28px #8aa9d52b}
+.style-spatial .concept-extension .ext-panel{box-shadow:0 14px 25px #8099c02b,0 2px 0 #fff;transform:perspective(900px) rotateX(.4deg)}
+@media(max-width:900px){.ext-two{grid-template-columns:1fr}.ext-three{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.concept-extension{margin-top:13px}.ext-grid{gap:10px}.ext-panel{padding:13px;border-radius:14px}.ext-three{grid-template-columns:1fr}.ext-head{flex-direction:column}.ext-table{min-width:500px}.ext-number-band{gap:12px}}
+
+
+/* FIX: exactly one dashboard is rendered; theme switches never anchor-scroll. */
+.tabs button[data-view]{display:inline-block;cursor:pointer;flex:0 0 auto;white-space:nowrap;font:inherit}
+section.concept-view:not(.active){display:none!important}
+section.concept-view.active{display:block!important;scroll-margin-top:0!important}
+
+
+/* FIX: only selected dashboard visible; button tabs switch in-place without anchor scrolling. */
+.tabs button[data-view]{display:inline-block;cursor:pointer;flex:0 0 auto;white-space:nowrap;font:inherit}
+section.concept-view:not(.active){display:none!important}
+section.concept-view.active{display:block!important;scroll-margin-top:0!important}
+
+
+/* Final layout hardening: one dashboard panel at a time; keep navigation above the active view. */
+.app-shell{position:relative}
+.tabs{z-index:60}
+.tabs button:focus-visible,.actionbar button:focus-visible{outline:3px solid #74a8ff;outline-offset:3px}
+@media(max-width:650px){.app-shell{padding-bottom:8px}.tabs{max-width:100%;overscroll-behavior-x:contain}.v-wrap{min-width:0}.v-grid{min-width:0}}
+
+/* Responsive containment: wide data tables scroll inside their own cards, never across the page. */
+.table-scroll,.ext-table-scroll,.suite-table-wrap,.gantt-wrap{max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-x:contain}
+@media(max-width:650px){
+  .v-card,.ext-panel,.suite-card{min-width:0}
+  .v-grid,.ext-grid,.suite-grid{min-width:0}
+  .concept-view{min-width:0;max-width:100%;overflow-x:clip}
+  .v-wrap{width:100%;max-width:100%;overflow-x:clip}
+  .table-scroll,.ext-table-scroll,.suite-table-wrap,.gantt-wrap{width:100%;min-width:0}
+  table.v-table,table.ext-table,table.suite-table,table.gantt,table.matrix{max-width:none}
+}
+
+</style>
+</head>
+<body>
+<div class="app-shell"><div class="actionbar"><button id="saveBtn" type="button">Save</button><button id="shareBtn" type="button">Share</button></div><nav aria-label="Dashboard designs" class="tabs"><button aria-pressed="true" class="active" data-view="concept-1" type="button">01 · Neumorphism</button><button aria-pressed="false" class="" data-view="concept-2" type="button">02 · Skeuomorphism</button><button aria-pressed="false" class="" data-view="concept-3" type="button">03 · Glassmorphism</button><button aria-pressed="false" class="" data-view="concept-4" type="button">04 · Claymorphism</button><button aria-pressed="false" class="" data-view="concept-5" type="button">05 · Brutalism</button><button aria-pressed="false" class="" data-view="concept-6" type="button">06 · Minimalism</button><button aria-pressed="false" class="" data-view="concept-7" type="button">07 · Maximalism</button><button aria-pressed="false" class="" data-view="concept-8" type="button">08 · Liquid Glass</button><button aria-pressed="false" class="" data-view="concept-9" type="button">09 · Spatial UI</button><button aria-pressed="false" class="" data-view="concept-10" type="button">10 · AI Summary</button><button aria-pressed="false" class="" data-view="concept-11" type="button">11 · Time Series</button><button aria-pressed="false" class="" data-view="concept-12" type="button">12 · Waterfall</button><button aria-pressed="false" class="" data-view="concept-13" type="button">13 · Treemap</button><button aria-pressed="false" class="" data-view="concept-14" type="button">14 · Funnel</button><button aria-pressed="false" class="" data-view="concept-15" type="button">15 · Correlation</button><button aria-pressed="false" class="" data-view="concept-16" type="button">16 · Analyst Workbench</button></nav>
+<section class="concept-view active" id="concept-1"><main class="dashboard">
+<section aria-label="Key performance indicators" class="kpis">
+<article class="card kpi">
+<div class="icon blue">▣</div><div><div class="kpi-label">Total Spending</div><p class="kpi-value">₹103,000</p><span class="trend down">↘ 10.78%</span><span class="vs">vs last month</span></div>
+<svg aria-hidden="true" class="spark" viewbox="0 0 80 48"><path d="M2 30 C15 5 21 42 38 25 S58 12 78 27" fill="none" stroke="#ff6688" stroke-linecap="round" stroke-width="2.5"></path></svg>
+</article>
+<article class="card kpi">
+<div class="icon green">$</div><div><div class="kpi-label">Total Revenue</div><p class="kpi-value">₹33,678</p><span class="trend up">↑ 10.76%</span><span class="vs">vs last month</span></div>
+<svg aria-hidden="true" class="spark" viewbox="0 0 80 48"><path d="M2 36 C17 3 23 40 39 28 S57 2 78 11" fill="none" stroke="#25d6a0" stroke-linecap="round" stroke-width="2.5"></path></svg>
+</article>
+<article class="card kpi">
+<div class="icon purple">🛒</div><div><div class="kpi-label">New Orders</div><p class="kpi-value">1,420</p><span class="trend up">↑ 12.45%</span><span class="vs">vs last month</span></div>
+<svg aria-hidden="true" class="spark" viewbox="0 0 80 48"><path d="M2 32 C15 4 21 40 37 27 S57 5 78 13" fill="none" stroke="#9b70ff" stroke-linecap="round" stroke-width="2.5"></path></svg>
+</article>
+<article class="card kpi">
+<div class="icon orange">♙</div><div><div class="kpi-label">Active Users</div><p class="kpi-value">35,633</p><span class="trend up">↑ 16.87%</span><span class="vs">vs last month</span></div>
+<svg aria-hidden="true" class="spark" viewbox="0 0 80 48"><path d="M2 35 C15 3 23 43 39 27 S56 2 78 14" fill="none" stroke="#ffae43" stroke-linecap="round" stroke-width="2.5"></path></svg>
+</article>
+</section>
+<section class="middle">
+<article class="card panel">
+<header class="panel-head"><div class="heading"><span class="icon blue">▥</span>Revenue Overview</div>
+<select aria-label="Revenue time range" class="select" id="revenueRange"><option>Last 30 Days</option><option>Last 7 Days</option><option>Last 90 Days</option></select>
+</header>
+<svg aria-label="Revenue line chart" class="chart" role="img" viewbox="0 0 760 280">
+<defs><lineargradient id="areaBlue" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#3485ff" stop-opacity=".28"></stop><stop offset="100%" stop-color="#3485ff" stop-opacity=".02"></stop></lineargradient></defs>
+<g stroke="#d9e5f7" stroke-width="1"><path d="M48 25H744M48 65H744M48 105H744M48 145H744M48 185H744M48 225H744"></path><path d="M48 25V225M141 25V225M234 25V225M327 25V225M420 25V225M513 25V225M606 25V225M699 25V225"></path></g>
+<g><text x="7" y="229">0</text><text x="0" y="189">10K</text><text x="0" y="149">20K</text><text x="0" y="109">30K</text><text x="0" y="69">40K</text><text x="0" y="29">50K</text></g>
+<path d="M48 115 C78 83 89 132 120 124 S164 121 190 148 S235 154 263 145 S306 164 335 146 S383 125 413 130 S453 115 482 76 S524 53 550 87 S592 145 625 126 S671 61 704 62 S728 70 744 83" fill="none" stroke="#b7c8e3" stroke-width="2"></path>
+<path d="M48 105 C78 72 87 121 120 116 S165 122 190 151 S236 155 263 145 S307 171 335 148 S382 130 413 135 S454 119 482 65 S525 48 550 83 S592 146 625 126 S671 56 704 59 S728 66 744 77 L744 225 L48 225Z" fill="url(#areaBlue)"></path>
+<path d="M48 105 C78 72 87 121 120 116 S165 122 190 151 S236 155 263 145 S307 171 335 148 S382 130 413 135 S454 119 482 65 S525 48 550 83 S592 146 625 126 S671 56 704 59 S728 66 744 77" fill="none" stroke="#2580ff" stroke-linecap="round" stroke-width="3"></path>
+<path d="M482 65V225" stroke="#8ebaff" stroke-dasharray="4 5"></path><circle cx="482" cy="65" fill="#edf3fd" r="7" stroke="#2580ff" stroke-width="4"></circle>
+<rect fill="#f6f9ff" height="30" rx="9" stroke="#dce7f8" width="88" x="438" y="8"></rect><text style="font-size:14px;fill:#15254b;font-weight:700" text-anchor="middle" x="482" y="28">₹38,450</text>
+<g><text text-anchor="middle" x="48" y="252">1 Nov</text><text text-anchor="middle" x="141" y="252">5 Nov</text><text text-anchor="middle" x="234" y="252">9 Nov</text><text text-anchor="middle" x="327" y="252">13 Nov</text><text text-anchor="middle" x="420" y="252">17 Nov</text><text text-anchor="middle" x="513" y="252">21 Nov</text><text text-anchor="middle" x="606" y="252">25 Nov</text><text text-anchor="middle" x="699" y="252">30 Nov</text></g>
+</svg>
+<div class="legend"><span><i class="dot" style="background:#3485ff"></i>Revenue</span><span><i class="dot" style="background:#b7c8e3"></i>Previous Period</span></div>
+</article>
+<article class="card panel">
+<header class="panel-head"><div class="heading"><span class="icon blue">▥</span>Projects / Tasks</div><select aria-label="Project period" class="select"><option>This Month</option><option>This Week</option><option>This Year</option></select></header>
+<div class="projects-content">
+<div class="donut" style="background:conic-gradient(#5bd5aa 0 40%,#438dff 40% 70%,#ffb75f 70% 87%,#aa83ff 87% 100%)">
+<div class="donut-center"><strong>128</strong><span>Total Projects</span></div>
+</div>
+<div class="status-list">
+<div class="status"><i class="dot" style="background:#43d2a3"></i><span>Completed</span><b>52</b><span class="percent">40%</span></div>
+<div class="status"><i class="dot" style="background:#4c9bff"></i><span>In Progress</span><b>38</b><span class="percent">30%</span></div>
+<div class="status"><i class="dot" style="background:#ffb15b"></i><span>Pending</span><b>22</b><span class="percent">17%</span></div>
+<div class="status"><i class="dot" style="background:#a77aff"></i><span>On Hold</span><b>16</b><span class="percent">13%</span></div>
+</div>
+</div>
+</article>
+</section>
+<section class="bottom">
+<article class="card panel gantt-panel">
+<header class="panel-head"><div class="heading"><span class="icon blue">☷</span>Gantt Chart</div><select aria-label="Gantt date range" class="select"><option>1 Nov 2022 - 30 Nov 2022</option><option>1 Dec 2022 - 31 Dec 2022</option></select></header>
+<div class="gantt-wrap"><table class="gantt">
+<thead><tr><th>Task</th><th>1 Nov</th><th>5 Nov</th><th>10 Nov</th><th>15 Nov</th><th>20 Nov</th><th>25 Nov</th><th>30 Nov</th></tr></thead>
+<tbody>
+<tr><td>Design System</td><td colspan="2"><div class="bar-track"><div class="bar" style="width:100%;background:linear-gradient(90deg,#68aaff,#3987ff)"></div></div></td><td colspan="5"></td></tr>
+<tr><td>Development</td><td></td><td><div class="bar-track"><div class="bar" style="width:78%;background:linear-gradient(90deg,#71e0bd,#35c99a)"></div></div></td><td colspan="5"></td></tr>
+<tr><td>Testing</td><td colspan="2"></td><td><div class="bar-track"><div class="bar" style="width:70%;background:linear-gradient(90deg,#ffd080,#ffad50)"></div></div></td><td colspan="4"></td></tr>
+<tr><td>Deployment</td><td colspan="3"></td><td><div class="bar-track"><div class="bar" style="width:68%;background:linear-gradient(90deg,#c0a5ff,#986cff)"></div></div></td><td colspan="3"></td></tr>
+</tbody>
+</table></div>
+</article>
+<article class="card panel categories">
+<header class="panel-head"><div class="heading"><span class="icon blue">◔</span>Top Categories</div><select aria-label="Category period" class="select"><option>This Month</option><option>This Week</option></select></header>
+<div class="donut" style="background:conic-gradient(#5ba0ff 0 40%,#f58bc0 40% 65%,#ffb15b 65% 85%,#ad8bff 85% 100%)">
+<div class="donut-center"><strong style="font-size:22px">₹35,633</strong><span>Total Sales</span></div>
+</div>
+<div class="category-legend">
+<span><i class="dot" style="background:#5ba0ff"></i>Electronics　40%</span><span><i class="dot" style="background:#f58bc0"></i>Fashion　25%</span>
+<span><i class="dot" style="background:#ffb15b"></i>Home &amp; Living　20%</span><span><i class="dot" style="background:#ad8bff"></i>Others　15%</span>
+</div>
+</article>
+<article class="card panel">
+<header class="panel-head"><div class="heading"><span class="icon blue">◷</span>Recent Activities</div></header>
+<div class="activity">
+<div class="activity-row"><span class="icon green">🛒</span><div><strong>New order received</strong><small>#12345</small></div><span class="time">10:30 AM</span></div>
+<div class="activity-row"><span class="icon blue">♙</span><div><strong>User registered</strong><small>rohit@example.com</small></div><span class="time">09:15 AM</span></div>
+<div class="activity-row"><span class="icon orange">▤</span><div><strong>Project updated</strong><small>Design System</small></div><span class="time">08:45 AM</span></div>
+<div class="activity-row"><span class="icon purple">✓</span><div><strong>Task completed</strong><small>UI Improvements</small></div><span class="time">07:20 AM</span></div>
+</div>
+</article>
+</section>
+</main><div class="complete-suite neumo-suite">
+<div class="suite-heading"><div><h2>Summary &amp; detailed analytics</h2><p>Same sample data across every design so you can compare layout, hierarchy and readability.</p></div><span class="suite-status">DEMO DATA</span></div>
+<div class="suite-grid suite-two">
+<article class="suite-card">
+<div class="suite-panel-head"><div><h3>Executive summary</h3><div class="suite-sub">What the latest data is saying</div></div><span class="suite-status">Positive</span></div>
+<p class="suite-summary">Revenue is improving against the previous period and retention remains healthy. The strongest contribution comes from the core segment, so the next review should focus on whether growth is spreading across more segments and whether risk exposure remains within the expected range.</p>
+<ul class="suite-bullets">
+<li>Revenue reached <b>₹33,678</b>, up <b>10.76%</b> from the previous period.</li>
+<li>Orders increased to <b>1,420</b> while retention held at <b>92.4%</b>.</li>
+<li>Risk exposure is <b>68.4%</b>; keep it visible against the 75% watch threshold.</li>
+</ul>
+</article>
+<article class="suite-card">
+<div class="suite-panel-head"><div><h3>Analyst interpretation</h3><div class="suite-sub">Context beyond the headline values</div></div><span class="suite-metric-icon">✦</span></div>
+<p class="suite-summary">The direction is constructive, but a positive headline alone does not prove that performance is sustainable. Compare the trend with its baseline, examine the contribution mix and check whether exposure is rising faster than the underlying opportunity.</p>
+<div class="suite-divider" style="height:1px;background:var(--suite-line);margin:13px 0"></div>
+<div class="suite-callout"><b style="font-size:10px">Suggested focus</b><p class="suite-summary" style="margin-top:5px">Validate segment breadth and downside sensitivity before increasing the risk budget.</p></div>
+</article>
+</div>
+<div class="suite-grid suite-four" style="margin-top:13px">
+<article class="suite-card suite-metric"><div class="suite-metric-top"><span>Total revenue</span><span class="suite-metric-icon">↗</span></div><div class="suite-metric-value">₹33,678</div><div class="suite-metric-foot"><span class="suite-positive">↑ 10.76%</span><span>vs previous</span><svg class="suite-spark" viewbox="0 0 70 25"><path d="M1 21 12 16 21 19 31 9 40 13 50 6 60 9 69 2" fill="none" stroke="#3485ff" stroke-width="2.3"></path></svg></div></article>
+<article class="suite-card suite-metric"><div class="suite-metric-top"><span>New orders</span><span class="suite-metric-icon">▤</span></div><div class="suite-metric-value">1,420</div><div class="suite-metric-foot"><span class="suite-positive">↑ 12.45%</span><span>vs previous</span><svg class="suite-spark" viewbox="0 0 70 25"><path d="M1 22 12 18 21 19 31 13 40 15 50 7 60 10 69 2" fill="none" stroke="#35c99a" stroke-width="2.3"></path></svg></div></article>
+<article class="suite-card suite-metric"><div class="suite-metric-top"><span>Retention rate</span><span class="suite-metric-icon">◎</span></div><div class="suite-metric-value">92.4%</div><div class="suite-metric-foot"><span class="suite-positive">↑ 2.1 pts</span><span>vs previous</span><svg class="suite-spark" viewbox="0 0 70 25"><path d="M1 19 12 17 21 18 31 12 40 13 50 8 60 8 69 3" fill="none" stroke="#9b70ff" stroke-width="2.3"></path></svg></div></article>
+<article class="suite-card suite-metric"><div class="suite-metric-top"><span>Risk exposure</span><span class="suite-metric-icon">!</span></div><div class="suite-metric-value">68.4%</div><div class="suite-metric-foot"><span class="suite-warning">Watch</span><span>75% threshold</span><svg class="suite-spark" viewbox="0 0 70 25"><path d="M1 22 12 20 21 16 31 17 40 11 50 10 60 5 69 2" fill="none" stroke="#ffad50" stroke-width="2.3"></path></svg></div></article>
+</div>
+<div class="suite-grid suite-two" style="margin-top:13px">
+<article class="suite-card">
+<div class="suite-panel-head"><div><h3>Revenue time series</h3><div class="suite-sub">Trend and baseline comparison over seven checkpoints</div></div><span class="suite-status">+10.76%</span></div>
+<svg aria-label="Revenue time series chart" class="suite-chart" role="img" viewbox="0 0 680 230">
+<defs><lineargradient id="suiteAreaFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--suite-accent)" stop-opacity=".24"></stop><stop offset="1" stop-color="var(--suite-accent)" stop-opacity="0"></stop></lineargradient></defs>
+<g class="line-grid"><path d="M40 30H655M40 70H655M40 110H655M40 150H655M40 190H655"></path></g>
+<g><text x="4" y="194">0</text><text x="2" y="154">10K</text><text x="2" y="114">20K</text><text x="2" y="74">30K</text><text x="2" y="34">40K</text></g>
+<path d="M40 158 C75 143 100 164 130 140 S185 147 220 122 S275 139 310 104 S365 117 400 88 S455 97 490 64 S545 78 580 48 S620 54 655 30 L655 190H40Z" fill="url(#suiteAreaFill)"></path>
+<path d="M40 158 C75 143 100 164 130 140 S185 147 220 122 S275 139 310 104 S365 117 400 88 S455 97 490 64 S545 78 580 48 S620 54 655 30" fill="none" stroke="var(--suite-accent)" stroke-linecap="round" stroke-width="3"></path>
+<path d="M40 170 C150 159 230 150 310 139 S470 124 560 107 S620 100 655 97" fill="none" stroke="#a7bad8" stroke-dasharray="5 5" stroke-width="2"></path>
+<circle cx="490" cy="64" fill="var(--suite-card)" r="5" stroke="var(--suite-accent)" stroke-width="3"></circle>
+<g><text x="40" y="215">W1</text><text x="140" y="215">W2</text><text x="240" y="215">W3</text><text x="340" y="215">W4</text><text x="440" y="215">W5</text><text x="540" y="215">W6</text><text text-anchor="end" x="655" y="215">Now</text></g>
+</svg>
+<div class="suite-legend"><span><i style="background:var(--suite-accent)"></i>Current period</span><span><i style="background:#a7bad8"></i>Baseline</span></div>
+</article>
+<article class="suite-card">
+<div class="suite-panel-head"><div><h3>Segment performance</h3><div class="suite-sub">Contribution and growth side by side</div></div></div>
+<div class="suite-bars">
+<div class="suite-bar-row"><span>Core</span><div class="suite-track"><span style="width:42%"></span></div><b>42%</b></div>
+<div class="suite-bar-row"><span>Growth</span><div class="suite-track"><span style="width:27%;background:#35c99a"></span></div><b>27%</b></div>
+<div class="suite-bar-row"><span>Watch</span><div class="suite-track"><span style="width:18%;background:#ffad50"></span></div><b>18%</b></div>
+<div class="suite-bar-row"><span>Emerging</span><div class="suite-track"><span style="width:13%;background:#9b70ff"></span></div><b>13%</b></div>
+</div>
+<div class="suite-divider" style="height:1px;background:var(--suite-line);margin:15px 0"></div>
+<p class="suite-summary">The core segment has the largest weight. Growth and emerging segments may offer diversification, while the watch segment deserves further investigation.</p>
+</article>
+</div>
+<article class="suite-card" style="margin-top:13px">
+<div class="suite-panel-head"><div><h3>Signal detail table</h3><div class="suite-sub">Comparable rows, statuses and exact values in every dashboard concept</div></div><span class="suite-status">4 signals</span></div>
+<div class="suite-table-wrap"><table class="suite-table">
+<thead><tr><th>Signal</th><th>Current value</th><th>Period change</th><th>Confidence</th><th>Interpretation</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td><b>Revenue momentum</b></td><td>₹33,678</td><td class="suite-positive">+10.76%</td><td>86 / 100</td><td>Above baseline</td><td><span class="suite-status">Positive</span></td></tr>
+<tr><td><b>New orders</b></td><td>1,420</td><td class="suite-positive">+12.45%</td><td>84 / 100</td><td>Volume increasing</td><td><span class="suite-status">Positive</span></td></tr>
+<tr><td><b>Retention rate</b></td><td>92.4%</td><td class="suite-positive">+2.1 pts</td><td>92 / 100</td><td>Quality stable</td><td><span class="suite-status">Stable</span></td></tr>
+<tr><td><b>Risk exposure</b></td><td>68.4%</td><td class="suite-warning">+4.2 pts</td><td>79 / 100</td><td>Near watch level</td><td><span class="suite-status watch">Watch</span></td></tr>
+</tbody>
+</table></div>
+</article>
+<div class="suite-note-row">
+<article class="suite-card"><h3>What the chart tells us</h3><p>The line moves higher through the later checkpoints, and the current-period trend sits above the baseline. The highlighted point represents a possible inflection that should be validated against the source data.</p></article>
+<article class="suite-card"><h3>What the table adds</h3><p>The chart communicates direction quickly, while the table preserves exact values, confidence and status. The paragraph provides the context needed to interpret both without turning the page into a wall of numbers.</p></article>
+</div>
+</div>
+</section>
+<section class="concept-view" id="concept-2"><div class="v-wrap style-skeuo">
+<div class="v-head"><div><h2 class="v-title">Portfolio control deck</h2><div class="v-sub">Tactile dials and status panels for monitoring performance against limits.</div></div><span class="v-pill">All systems normal</span></div>
+<div class="v-grid four" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+<article class="v-card instrument"><div class="v-label">Revenue target</div><svg class="v-chart" viewbox="0 0 160 105"><path d="M22 82 A58 58 0 0 1 138 82" fill="none" stroke="#d6e1f2" stroke-linecap="round" stroke-width="13"></path><path d="M22 82 A58 58 0 0 1 119 39" fill="none" stroke="#3485ff" stroke-linecap="round" stroke-width="13"></path><text style="font-size:24px;font-weight:850;fill:#15213d" text-anchor="middle" x="80" y="68">78%</text><text text-anchor="middle" x="80" y="88">on target</text></svg><div class="v-statrow"><span>Current</span><b>₹33.7K</b></div></article>
+<article class="v-card instrument"><div class="v-label">Signal quality</div><div class="knob" style="width:115px;height:115px;border-radius:50%;margin:15px auto;display:grid;place-items:center"><div style="background:#edf3fd;border-radius:50%;width:83px;height:83px;display:grid;place-content:center;text-align:center;box-shadow:inset 2px 2px 6px #bdcce3"><b style="font-size:25px">86</b><small>score</small></div></div><div class="v-statrow"><span>Confidence</span><b style="color:#139c72">High</b></div></article>
+<article class="v-card instrument"><div class="v-label">Exposure meter</div><div style="height:115px;display:flex;align-items:center;justify-content:center;gap:6px;margin:15px 0"><span style="height:34px;width:11px;border-radius:4px;background:#b8cfff"></span><span style="height:49px;width:11px;border-radius:4px;background:#9fbcff"></span><span style="height:68px;width:11px;border-radius:4px;background:#789eff"></span><span style="height:83px;width:11px;border-radius:4px;background:#4e80f7"></span><span style="height:99px;width:11px;border-radius:4px;background:#f58bc0"></span><span style="height:83px;width:11px;border-radius:4px;background:#dfe7f6"></span><span style="height:68px;width:11px;border-radius:4px;background:#dfe7f6"></span><span style="height:49px;width:11px;border-radius:4px;background:#dfe7f6"></span></div><div class="v-statrow"><span>Risk budget</span><b style="color:#c84e6c">68.4%</b></div></article>
+<article class="v-card instrument"><div class="v-label">Active opportunities</div><div class="v-num" style="font-size:33px;margin-top:24px">1,420</div><svg class="v-spark" viewbox="0 0 180 35"><path d="M2 30 22 24 43 27 64 15 84 18 108 8 132 15 155 5 178 3" fill="none" stroke="#35c99a" stroke-linecap="round" stroke-width="3"></path></svg><div class="v-statrow"><span>Period change</span><b style="color:#139c72">↑ 12.45%</b></div></article>
+</div>
+<div class="v-grid two" style="grid-template-columns:1.2fr .8fr;margin-top:15px"><article class="v-card"><div class="v-head"><div><h3 class="v-title">Trend instrument</h3><div class="v-sub">A physical-meter-inspired time series</div></div><span class="v-pill">Rising</span></div><svg class="v-chart" viewbox="0 0 650 210"><g class="v-gridline"><path d="M30 35H625M30 75H625M30 115H625M30 155H625"></path></g><path d="M30 150 C70 140 80 160 120 132 S190 147 225 110 S290 129 330 87 S400 103 440 70 S500 89 540 50 S595 59 625 31" fill="none" stroke="#3485ff" stroke-width="4"></path><circle cx="540" cy="50" fill="#edf3fd" r="7" stroke="#3485ff" stroke-width="4"></circle><text x="30" y="187">Start</text><text text-anchor="end" x="625" y="187">Now</text></svg></article><article class="v-card"><h3 class="v-title">System status</h3><p class="v-paragraph">A tactile control deck works best for metrics with a limit, a target or a known healthy operating range.</p><div class="v-statrow"><span>Revenue feed</span><b class="v-change">Connected</b></div><div class="v-statrow"><span>Risk threshold</span><b style="color:#c98628">Near watch</b></div><div class="v-statrow"><span>Signal refresh</span><b>2 min ago</b></div></article></div>
+<div class="concept-extension ext-grid">
+<div class="ext-grid ext-two">
+<article class="ext-panel"><div class="ext-head"><div><h3>Readout / operating note</h3><p>Interpretation from the current control deck</p></div><span class="ext-chip">STEADY</span></div><p class="ext-copy" style="font-size:11px">The primary readings are constructive: revenue and order volume are improving, while retention remains in a healthy range. Exposure is the one dial approaching its review zone.</p><ul class="ext-bullets"><li>Revenue is above the previous-period baseline.</li><li>Retention stays high while order volume increases.</li><li>Review exposure before increasing risk budget.</li></ul></article>
+<article class="ext-panel"><h3>Readout log</h3><div class="ext-kpi-inline"><span>Revenue velocity</span><b>+10.76%</b></div><div class="ext-kpi-inline"><span>Retention</span><b>92.4%</b></div><div class="ext-kpi-inline"><span>Risk exposure</span><b style="color:#b67b20">68.4%</b></div><p class="ext-table-note">Tactile status list, designed like a compact equipment log.</p></article>
+</div>
+<article class="ext-panel"><div class="ext-head"><div><h3>Measured history</h3><p>Time series across seven checkpoints</p></div><span class="ext-chip">+10.76%</span></div><svg class="ext-series" viewbox="0 0 680 150"><g class="gridline"><path d="M30 25H650M30 60H650M30 95H650M30 125H650"></path></g><path d="M30 116 C70 104 90 123 125 97 S185 114 220 84 S275 94 310 72 S365 88 400 53 S455 69 490 43 S555 56 590 28 S625 35 650 18" fill="none" stroke="#3485ff" stroke-width="3"></path><text x="30" y="145">Start</text><text text-anchor="middle" x="340" y="145">Mid-period</text><text text-anchor="end" x="650" y="145">Now</text></svg></article>
+<article class="ext-panel"><div class="ext-head"><div><h3>Control readings</h3><p>Exact values and current interpretation</p></div></div><div class="ext-table-scroll"><table class="ext-table"><thead><tr><th>Instrument</th><th>Reading</th><th>Change</th><th>State</th></tr></thead><tbody><tr><td>Revenue</td><td>₹33,678</td><td>+10.76%</td><td><span class="ext-chip">Positive</span></td></tr><tr><td>Orders</td><td>1,420</td><td>+12.45%</td><td><span class="ext-chip">Positive</span></td></tr><tr><td>Retention</td><td>92.4%</td><td>+2.1 pts</td><td><span class="ext-chip">Stable</span></td></tr><tr><td>Exposure</td><td>68.4%</td><td>+4.2 pts</td><td><span class="ext-chip watch">Watch</span></td></tr></tbody></table></div></article>
+</div></div></section><section class="concept-view" id="concept-3"><div class="v-wrap style-glass">
+<div class="v-grid two" style="grid-template-columns:1.15fr .85fr">
+<article class="v-card glass-hero" style="padding:25px"><div class="v-label">Executive insight · AI summary</div><h2 style="font-size:clamp(27px,3.4vw,43px);line-height:1.1;letter-spacing:-1.5px;margin:15px 0 12px">Momentum is improving. Concentration needs attention.</h2><p class="v-paragraph" style="font-size:12px">Revenue has moved above its recent baseline while retention remains healthy. Growth is still concentrated in the core segment, so review breadth before increasing risk.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px"><span class="v-pill">↗ Revenue +10.76%</span><span class="v-pill" style="background:#fff0d8;color:#a66b15">Risk watch · 68.4%</span></div></article>
+<article class="v-card"><div class="v-head"><div><h3 class="v-title">Signal confidence</h3><div class="v-sub">Combined evidence score</div></div><span class="v-label">LIVE</span></div><div style="display:flex;align-items:center;gap:20px"><div class="liquid-orb" style="height:125px;width:125px;display:grid;place-items:center;flex-shrink:0"><b style="font-size:30px">86</b></div><div><div class="v-num">86 / 100</div><div class="v-change">+8 pts this period</div><p class="v-paragraph">Strong alignment between revenue, orders and retention.</p></div></div></article>
+</div>
+<div class="v-grid three" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:15px">
+<article class="v-card"><div class="v-label">Revenue</div><div class="v-num">₹33.7K</div><svg class="v-spark" viewbox="0 0 130 35"><path d="M1 29 17 21 33 25 49 14 65 18 81 10 97 13 113 4 129 2" fill="none" stroke="#3485ff" stroke-width="2.7"></path></svg><span class="v-change">↑ 10.76%</span></article>
+<article class="v-card"><div class="v-label">Retention</div><div class="v-num">92.4%</div><svg class="v-spark" viewbox="0 0 130 35"><path d="M1 25 17 23 33 20 49 22 65 14 81 17 97 11 113 8 129 5" fill="none" stroke="#35c99a" stroke-width="2.7"></path></svg><span class="v-change">↑ 2.1 pts</span></article>
+<article class="v-card"><div class="v-label">Exposure</div><div class="v-num">68.4%</div><div class="v-bar" style="margin:16px 0"><span style="width:68%;background:#ffad50"></span></div><span style="font-size:10px;color:#b67b24;font-weight:850">Watch threshold 75%</span></article>
+</div>
+<div class="v-grid two" style="grid-template-columns:1fr 1fr;margin-top:15px"><article class="v-card"><div class="v-head"><div><h3 class="v-title">Signal trajectory</h3><div class="v-sub">Translucent trend pane</div></div></div><svg class="v-chart" viewbox="0 0 520 155"><defs><lineargradient id="glassarea" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3485ff" stop-opacity=".25"></stop><stop offset="1" stop-color="#3485ff" stop-opacity="0"></stop></lineargradient></defs><g class="v-gridline"><path d="M20 30H500M20 70H500M20 110H500"></path></g><path d="M20 122 70 109 110 120 155 88 200 99 245 70 290 82 335 48 380 58 430 30 500 20V140H20Z" fill="url(#glassarea)"></path><path d="M20 122 70 109 110 120 155 88 200 99 245 70 290 82 335 48 380 58 430 30 500 20" fill="none" stroke="#3485ff" stroke-width="3"></path></svg></article><article class="v-card"><h3 class="v-title">What changed?</h3><div class="v-statrow"><b>Revenue momentum</b><span>Positive</span></div><div class="v-statrow"><b>Retention quality</b><span>Stable</span></div><div class="v-statrow"><b>Segment concentration</b><span style="color:#b67b24">Elevated</span></div><p class="v-paragraph">Glass layering creates depth, but the reading order still prioritizes the conclusion and the evidence beneath it.</p></article></div>
+<div class="concept-extension ext-grid">
+<article class="ext-panel" style="background:linear-gradient(110deg,rgba(255,255,255,.8),rgba(219,233,255,.65))"><div class="ext-head"><div><h3>AI summary / layered evidence</h3><p>Floating interpretation panel</p></div><span class="ext-chip">86% CONFIDENT</span></div><p class="ext-copy" style="font-size:12px">Current momentum is positive and supported by an improvement in revenue and orders. The underlying quality signal is steady, but contribution remains concentrated in the core segment.</p><ul class="ext-bullets"><li>Momentum moved above baseline in the later checkpoints.</li><li>Retention remains stable at 92.4%.</li><li>Exposure of 68.4% is below, but close to, the 75% watch line.</li></ul></article>
+<div class="ext-grid ext-three">
+<article class="ext-panel"><div class="ext-label">Net revenue</div><div class="ext-value">₹33,678</div><div class="ext-chip">↑ 10.76%</div></article><article class="ext-panel"><div class="ext-label">Order volume</div><div class="ext-value">1,420</div><div class="ext-chip">↑ 12.45%</div></article><article class="ext-panel"><div class="ext-label">Exposure</div><div class="ext-value">68.4%</div><div class="ext-chip watch">Review</div></article>
+</div>
+<article class="ext-panel"><div class="ext-head"><div><h3>Glass-layered time series</h3><p>Revenue against recent baseline</p></div><span class="ext-chip">Current period</span></div><svg class="ext-series" viewbox="0 0 680 155"><g class="gridline"><path d="M25 30H655M25 70H655M25 110H655"></path></g><path d="M25 120 80 101 135 114 190 79 245 91 300 66 355 79 410 50 465 57 520 29 575 39 655 15" fill="none" stroke="#3485ff" stroke-width="3.2"></path><path d="M25 132 80 122 135 124 190 110 245 113 300 99 355 103 410 91 465 94 520 85 575 82 655 78" fill="none" stroke="#a8bad8" stroke-dasharray="5 5" stroke-width="2"></path><text x="25" y="145">Earlier</text><text text-anchor="end" x="655" y="145">Now</text></svg></article>
+<article class="ext-panel"><div class="ext-head"><div><h3>Evidence table</h3><p>See the values behind the translucent panels</p></div></div><div class="ext-table-scroll"><table class="ext-table"><thead><tr><th>Signal</th><th>Value</th><th>Change</th><th>Reading</th></tr></thead><tbody><tr><td>Revenue</td><td>₹33,678</td><td>+10.76%</td><td>Positive</td></tr><tr><td>Orders</td><td>1,420</td><td>+12.45%</td><td>Positive</td></tr><tr><td>Retention</td><td>92.4%</td><td>+2.1 pts</td><td>Stable</td></tr><tr><td>Exposure</td><td>68.4%</td><td>+4.2 pts</td><td>Watch</td></tr></tbody></table></div></article>
+</div></div></section><section class="concept-view" id="concept-4"><div class="v-wrap style-clay">
+<div class="v-head"><div><h2 class="v-title">Performance playground</h2><div class="v-sub">Raised, soft-touch modules with metrics grouped by job-to-be-done.</div></div><span class="v-pill">Updated today</span></div>
+<div class="v-grid two" style="grid-template-columns:.8fr 1.2fr">
+<article class="v-card" style="display:flex;flex-direction:column;justify-content:space-between;min-height:270px"><div><div class="clay-icon" style="width:47px;height:47px;display:grid;place-items:center;font-size:21px">↗</div><div class="v-label" style="margin-top:22px">Primary outcome</div><div class="v-num" style="font-size:clamp(38px,5vw,64px)">₹33,678</div><span class="v-pill">↑ 10.76% over baseline</span></div><p class="v-paragraph">Revenue is leading the current period. Use the adjacent trend and segment mix to understand the quality of this growth.</p></article>
+<article class="v-card"><div class="v-head"><div><h3 class="v-title">Performance ribbon</h3><div class="v-sub">Metric checkpoints arranged along a single path</div></div></div><div style="display:grid;gap:15px;padding:7px 0"><div style="display:grid;grid-template-columns:35px 1fr auto;gap:11px;align-items:center"><div class="clay-icon" style="height:34px;width:34px;display:grid;place-items:center">01</div><div><b style="font-size:12px">Orders</b><div class="v-bar" style="margin-top:7px"><span style="width:84%;background:#3485ff"></span></div></div><strong>1,420</strong></div><div style="display:grid;grid-template-columns:35px 1fr auto;gap:11px;align-items:center"><div class="clay-icon" style="height:34px;width:34px;display:grid;place-items:center">02</div><div><b style="font-size:12px">Retention</b><div class="v-bar" style="margin-top:7px"><span style="width:92%;background:#35c99a"></span></div></div><strong>92.4%</strong></div><div style="display:grid;grid-template-columns:35px 1fr auto;gap:11px;align-items:center"><div class="clay-icon" style="height:34px;width:34px;display:grid;place-items:center">03</div><div><b style="font-size:12px">Signal strength</b><div class="v-bar" style="margin-top:7px"><span style="width:86%;background:#9b70ff"></span></div></div><strong>86 / 100</strong></div></div></article>
+</div>
+<div class="v-grid three" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:15px"><article class="v-card"><div class="clay-icon" style="width:38px;height:38px;display:grid;place-items:center">◔</div><div class="v-label" style="margin-top:15px">Signal confidence</div><div class="v-num">86%</div><div class="v-bar"><span style="width:86%;background:#9b70ff"></span></div></article><article class="v-card"><div class="clay-icon" style="width:38px;height:38px;display:grid;place-items:center">◎</div><div class="v-label" style="margin-top:15px">Risk budget used</div><div class="v-num">68.4%</div><div class="v-bar"><span style="width:68%;background:#ffad50"></span></div></article><article class="v-card"><div class="clay-icon" style="width:38px;height:38px;display:grid;place-items:center">✓</div><div class="v-label" style="margin-top:15px">Active segments</div><div class="v-num">4 / 5</div><div class="v-bar"><span style="width:80%;background:#35c99a"></span></div></article></div>
+<div class="v-grid two" style="grid-template-columns:1.2fr .8fr;margin-top:15px"><article class="v-card"><div class="v-head"><div><h3 class="v-title">Smooth trend</h3><div class="v-sub">The soft card supports the actual data story</div></div></div><svg class="v-chart" viewbox="0 0 600 175"><g class="v-gridline"><path d="M25 35H575M25 75H575M25 115H575"></path></g><path d="M25 125 C70 116 85 137 130 103 S195 118 235 88 S300 108 340 75 S400 86 440 53 S500 65 575 25" fill="none" stroke="#3485ff" stroke-linecap="round" stroke-width="3.5"></path><text x="25" y="158">Earlier</text><text text-anchor="end" x="575" y="158">Current</text></svg></article><article class="v-card"><h3 class="v-title">AI note</h3><p class="v-paragraph" style="font-size:12px;color:#15213d">Good performance should feel reassuring, not noisy. Keep one primary outcome in focus and make supporting evidence feel easy to scan.</p><div class="v-divider"></div><div class="v-statrow"><span>Momentum</span><b class="v-change">Positive</b></div><div class="v-statrow"><span>Concentration</span><b style="color:#b67b24">Review</b></div></article></div>
+<div class="concept-extension ext-grid">
+<article class="ext-panel"><div class="ext-head"><div><h3>Performance notes</h3><p>Rounded, tactile summary module</p></div><span class="ext-chip">On the rise</span></div><p class="ext-copy" style="font-size:12px">The performance picture is positive across revenue, orders and retention. The key management question is whether new segments can carry a larger share of growth without increasing concentration.</p><ul class="ext-bullets"><li>Revenue and orders both increased from the prior period.</li><li>Retention is healthy and supports the volume story.</li><li>Exposure is the constraint to keep within defined limits.</li></ul></article>
+<div class="ext-grid ext-three"><article class="ext-panel"><div class="ext-label">Revenue</div><div class="ext-value">₹33.7K</div><div class="ext-bar"><span style="width:79%"></span></div></article><article class="ext-panel"><div class="ext-label">Retention</div><div class="ext-value">92.4%</div><div class="ext-bar"><span style="width:92%;background:#35c99a"></span></div></article><article class="ext-panel"><div class="ext-label">Confidence</div><div class="ext-value">86 / 100</div><div class="ext-bar"><span style="width:86%;background:#9b70ff"></span></div></article></div>
+<div class="ext-grid ext-two"><article class="ext-panel"><div class="ext-head"><div><h3>Soft trendline</h3><p>Revenue history with organic curve</p></div></div><svg class="ext-series" viewbox="0 0 600 150"><g class="gridline"><path d="M25 25H575M25 65H575M25 105H575"></path></g><path d="M25 116 C64 105 82 127 120 96 S178 115 215 81 S270 92 310 64 S370 78 408 49 S465 59 505 28 S550 37 575 18" fill="none" stroke="#3485ff" stroke-linecap="round" stroke-width="3.5"></path><text x="25" y="140">Start</text><text text-anchor="end" x="575" y="140">Now</text></svg></article><article class="ext-panel"><h3>Performance register</h3><div class="ext-kpi-inline"><span>Orders</span><b>1,420 · +12.45%</b></div><div class="ext-kpi-inline"><span>Risk exposure</span><b>68.4% · Watch</b></div><div class="ext-kpi-inline"><span>Core segment share</span><b>42%</b></div><p class="ext-copy">A compact register complements the raised performance modules.</p></article></div>
+<article class="ext-panel"><h3>Detail table</h3><div class="ext-table-scroll"><table class="ext-table"><thead><tr><th>Metric</th><th>Current</th><th>Previous change</th><th>Status</th></tr></thead><tbody><tr><td>Revenue</td><td>₹33,678</td><td>+10.76%</td><td>Positive</td></tr><tr><td>Orders</td><td>1,420</td><td>+12.45%</td><td>Positive</td></tr><tr><td>Retention</td><td>92.4%</td><td>+2.1 pts</td><td>Stable</td></tr><tr><td>Exposure</td><td>68.4%</td><td>+4.2 pts</td><td>Watch</td></tr></tbody></table></div></article>
+</div></div></section><section class="concept-view" id="concept-5"><div class="v-wrap style-brutal">
+<div class="v-grid two" style="grid-template-columns:1.15fr .85fr">
+<article class="v-card brutal-hero" style="padding:25px"><div class="v-label">01 / Dominant performance metric</div><div class="v-num" style="font-size:clamp(46px,7vw,84px);margin:20px 0 12px">₹33,678</div><div style="font-size:14px;font-weight:900">REVENUE <span style="color:#139c72">↗ +10.76%</span></div><p class="v-paragraph" style="font-weight:600;color:#405476">Growth is positive, but the core segment still drives 42% of the total. Expansion should be measured against concentration risk.</p></article>
+<article class="v-card" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div style="border:2px solid #233451;padding:15px;background:#dce8ff"><div class="v-label">Signal score</div><div class="v-num">86</div><b style="font-size:10px">HIGH CONFIDENCE</b></div><div style="border:2px solid #233451;padding:15px;background:#dff8ed"><div class="v-label">Orders</div><div class="v-num">1,420</div><b style="font-size:10px">+12.45%</b></div><div style="border:2px solid #233451;padding:15px;background:#fff0d8"><div class="v-label">Exposure</div><div class="v-num">68.4%</div><b style="font-size:10px">WATCH</b></div><div style="border:2px solid #233451;padding:15px;background:#f1eaff"><div class="v-label">Retention</div><div class="v-num">92.4%</div><b style="font-size:10px">STABLE</b></div></article>
+</div>
+<div class="v-grid two" style="grid-template-columns:1fr 1fr;margin-top:15px"><article class="v-card"><div class="v-head"><div><h3 class="v-title">Trend / hard labels</h3><div class="v-sub">Editorial chart with explicit checkpoints</div></div></div><svg class="v-chart" viewbox="0 0 570 190"><g class="v-gridline"><path d="M25 30H545M25 70H545M25 110H545M25 150H545"></path></g><path d="M25 130 85 119 145 132 205 95 265 106 325 72 385 83 445 45 505 55 545 28" fill="none" stroke="#3485ff" stroke-linejoin="round" stroke-width="4"></path><g fill="#15213d" font-size="10" font-weight="800"><text x="25" y="174">BASELINE</text><text text-anchor="middle" x="285" y="174">INFLECTION</text><text text-anchor="end" x="545" y="174">CURRENT</text></g></svg></article><article class="v-card"><h3 class="v-title">Decision table</h3><table class="v-table"><thead><tr><th>Signal</th><th>State</th><th>Next move</th></tr></thead><tbody><tr><td>Revenue</td><td>UP</td><td>Maintain</td></tr><tr><td>Risk</td><td>WATCH</td><td>Review</td></tr><tr><td>Retention</td><td>STABLE</td><td>Protect</td></tr><tr><td>Confidence</td><td>HIGH</td><td>Validate</td></tr></tbody></table></article></div>
+<div class="concept-extension ext-grid">
+<article class="ext-panel" style="background:#dce8ff"><div class="ext-label">02 / Summary</div><h3 style="font-size:23px;line-height:1.18;margin:10px 0">Growth is up. Concentration is the counterpoint.</h3><p class="ext-copy" style="color:#425776;font-weight:650">Revenue and order momentum are positive, but the core segment accounts for 42% of contribution.</p><ul class="ext-bullets"><li>REVENUE: +10.76%</li><li>RETENTION: 92.4%</li><li>EXPOSURE: 68.4% — WATCH</li></ul></article>
+<div class="ext-grid ext-two"><article class="ext-panel"><div class="ext-label">Time series / hard lines</div><svg class="ext-series" viewbox="0 0 600 150"><g class="gridline"><path d="M25 25H575M25 65H575M25 105H575"></path></g><path d="M25 120 80 111 135 118 190 84 245 91 300 67 355 76 410 49 465 57 520 29 575 18" fill="none" stroke="#3485ff" stroke-linejoin="round" stroke-width="4"></path><text x="25" y="140">BASELINE</text><text text-anchor="middle" x="300" y="140">INFLECTION</text><text text-anchor="end" x="575" y="140">NOW</text></svg></article><article class="ext-panel"><div class="ext-label">Current read</div><div class="ext-value">86 / 100</div><p class="ext-copy">Signal confidence remains high. Validate whether the trend broadens before increasing exposure.</p></article></div>
+<article class="ext-panel"><div class="ext-head"><div><h3>Decision register</h3><p>Raw rows, high contrast, no decorative table chrome</p></div></div><div class="ext-table-scroll"><table class="ext-table"><thead><tr><th>METRIC</th><th>VALUE</th><th>CHANGE</th><th>DECISION</th></tr></thead><tbody><tr><td>Revenue</td><td>₹33,678</td><td>+10.76%</td><td>MAINTAIN</td></tr><tr><td>Orders</td><td>1,420</td><td>+12.45%</td><td>MAINTAIN</td></tr><tr><td>Retention</td><td>92.4%</td><td>+2.1 pts</td><td>PROTECT</td></tr><tr><td>Exposure</td><td>68.4%</td><td>+4.2 pts</td><td>REVIEW</td></tr></tbody></table></div></article>
+</div></div></section><section class="concept-view" id="concept-6"><div class="v-wrap style-minimal">
+<div class="v-head"><div><div class="v-label">Portfolio review / 30 days</div><h2 class="v-title" style="font-size:23px;margin-top:8px">The numbers, without the noise.</h2><div class="v-sub">A flat editorial layout designed for quick comprehension.</div></div><span class="v-pill">Current period</span></div>
+<div class="v-grid" style="grid-template-columns:1fr">
+<article class="v-card" style="padding:0 22px"><div style="display:grid;grid-template-columns:1.1fr .6fr .7fr;gap:16px;align-items:center;padding:20px 0;border-bottom:1px solid #e7ebf3"><div><div class="v-label">Revenue</div><div class="v-num">₹33,678</div></div><div><div class="v-muted">Change</div><div class="v-change" style="margin-top:9px;font-size:13px">+10.76%</div></div><svg class="v-spark" viewbox="0 0 160 35"><path d="M1 29 20 25 39 28 58 14 77 19 96 9 115 14 134 5 159 2" fill="none" stroke="#3485ff" stroke-width="2"></path></svg></div>
+<div style="display:grid;grid-template-columns:1.1fr .6fr .7fr;gap:16px;align-items:center;padding:20px 0;border-bottom:1px solid #e7ebf3"><div><div class="v-label">Orders</div><div class="v-num">1,420</div></div><div><div class="v-muted">Change</div><div class="v-change" style="margin-top:9px;font-size:13px">+12.45%</div></div><svg class="v-spark" viewbox="0 0 160 35"><path d="M1 30 20 20 39 25 58 16 77 19 96 12 115 7 134 11 159 1" fill="none" stroke="#35c99a" stroke-width="2"></path></svg></div>
+<div style="display:grid;grid-template-columns:1.1fr .6fr .7fr;gap:16px;align-items:center;padding:20px 0;border-bottom:1px solid #e7ebf3"><div><div class="v-label">Retention</div><div class="v-num">92.4%</div></div><div><div class="v-muted">Change</div><div class="v-change" style="margin-top:9px;font-size:13px">+2.1 pts</div></div><svg class="v-spark" viewbox="0 0 160 35"><path d="M1 22 20 20 39 19 58 21 77 14 96 15 115 10 134 8 159 4" fill="none" stroke="#9b70ff" stroke-width="2"></path></svg></div>
+<div style="display:grid;grid-template-columns:1.1fr .6fr .7fr;gap:16px;align-items:center;padding:20px 0"><div><div class="v-label">Risk exposure</div><div class="v-num">68.4%</div></div><div><div class="v-muted">Watch threshold</div><div style="margin-top:9px;font-size:13px;color:#b67b24;font-weight:800">75%</div></div><div><div class="v-bar"><span style="width:68%;background:#ffad50"></span></div><div class="v-muted" style="margin-top:6px">6.6 pts headroom</div></div></div></article>
+</div>
+<div class="v-grid two" style="grid-template-columns:1.2fr .8fr;margin-top:15px"><article class="v-card"><div class="v-head"><div><h3 class="v-title">Trend</h3><div class="v-sub">A single low-ink timeseries</div></div></div><svg class="v-chart" viewbox="0 0 600 180"><g class="v-gridline"><path d="M20 35H580M20 80H580M20 125H580"></path></g><path d="M20 140 80 130 140 135 200 102 260 110 320 79 380 88 440 52 500 58 580 23" fill="none" stroke="#3485ff" stroke-width="2.5"></path><text x="20" y="165">Earlier</text><text text-anchor="end" x="580" y="165">Now</text></svg></article><article class="v-card"><h3 class="v-title">Summary</h3><p class="v-paragraph" style="color:#15213d;font-size:13px">Revenue and orders are improving. Retention is steady. Risk exposure is rising more quickly than the other indicators and deserves a focused review.</p><div class="v-divider"></div><span class="v-muted">Suggested focus</span><p class="v-paragraph">Protect retention while examining the segment mix behind revenue growth.</p></article></div>
+<div class="concept-extension ext-grid">
+<div class="ext-grid ext-two"><article class="ext-panel" style="padding:21px 22px"><div class="ext-label">Summary</div><p class="ext-copy" style="font-size:13px;color:#243653">Revenue and orders are improving. Retention remains steady. Exposure has moved closer to the watch threshold and needs the most attention in the next review.</p><ul class="ext-bullets"><li>Growth is positive across revenue and orders.</li><li>Retention remains in a healthy range.</li><li>Review concentration and exposure before scaling.</li></ul></article><article class="ext-panel"><div class="ext-label">At a glance</div><div class="ext-kpi-inline"><span>Signal confidence</span><b>86 / 100</b></div><div class="ext-kpi-inline"><span>Core contribution</span><b>42%</b></div><div class="ext-kpi-inline"><span>Watch threshold</span><b>75%</b></div></article></div>
+<article class="ext-panel"><div class="ext-head"><div><h3>Revenue history</h3><div class="v-sub">Low-ink time series</div></div><span class="ext-chip">+10.76%</span></div><svg class="ext-series" viewbox="0 0 680 145"><g class="gridline"><path d="M25 25H655M25 65H655M25 105H655"></path></g><path d="M25 115 80 109 135 112 190 89 245 96 300 74 355 80 410 55 465 61 520 36 575 42 655 18" fill="none" stroke="#3485ff" stroke-width="2.5"></path><text x="25" y="136">Earlier</text><text text-anchor="end" x="655" y="136">Now</text></svg></article>
+<article class="ext-panel"><div class="ext-head"><div><h3>Signal table</h3><p>Values and change, in a quiet typographic layout</p></div></div><div class="ext-table-scroll"><table class="ext-table"><thead><tr><th>Metric</th><th>Current</th><th>Change</th><th>Interpretation</th></tr></thead><tbody><tr><td>Revenue</td><td>₹33,678</td><td>+10.76%</td><td>Positive</td></tr><tr><td>Orders</td><td>1,420</td><td>+12.45%</td><td>Positive</td></tr><tr><td>Retention</td><td>92.4%</td><td>+2.1 pts</td><td>Stable</td></tr><tr><td>Exposure</td><td>68.4%</td><td>+4.2 pts</td><td>Watch</td></tr></tbody></table></div></article>
+</div></div></section><section class="concept-view" id="concept-7"><div class="v-wrap style-maximal">
+<div class="max-mosaic">
+<article class="v-card max-hero" style="grid-row:span 2;padding:23px"><div class="v-label">The performance snapshot</div><div class="max-number">₹33,678</div><div class="v-change" style="font-size:12px">↗ 10.76% this period</div><p class="v-paragraph" style="font-size:12px;color:#435a82">The current trend is moving upward. Most of the gain is still produced by the core segment, so breadth is the key quality check.</p><svg class="v-chart" style="margin-top:20px" viewbox="0 0 520 180"><defs><lineargradient id="maxfill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3485ff" stop-opacity=".28"></stop><stop offset="1" stop-color="#3485ff" stop-opacity="0"></stop></lineargradient></defs><path d="M20 125 70 110 120 123 170 80 220 98 270 64 320 76 370 45 420 52 500 18V155H20Z" fill="url(#maxfill)"></path><path d="M20 125 70 110 120 123 170 80 220 98 270 64 320 76 370 45 420 52 500 18" fill="none" stroke="#3485ff" stroke-width="3"></path></svg><div class="v-legend"><span><i style="background:#3485ff"></i>Revenue</span><span><i style="background:#35c99a"></i>Positive signal</span></div></article>
+<article class="v-card" style="background:#dff8ed"><div class="v-label">Orders</div><div class="v-num" style="font-size:clamp(32px,4vw,50px)">1,420</div><span style="font-size:11px;color:#128660;font-weight:850">↗ +12.45%</span><div class="v-bar" style="margin-top:17px;background:#c3eedf"><span style="width:82%;background:#35c99a"></span></div></article>
+<article class="v-card" style="background:#e9e1ff"><div class="v-label">Confidence</div><div class="v-num" style="font-size:clamp(30px,3.5vw,43px)">86 / 100</div><div style="display:flex;gap:4px;margin-top:15px"><i style="height:9px;flex:1;border-radius:5px;background:#9b70ff"></i><i style="height:9px;flex:1;border-radius:5px;background:#9b70ff"></i><i style="height:9px;flex:1;border-radius:5px;background:#9b70ff"></i><i style="height:9px;flex:1;border-radius:5px;background:#9b70ff"></i><i style="height:9px;flex:1;border-radius:5px;background:#d4c7fb"></i></div></article>
+<article class="v-card" style="background:#fff0d8"><div class="v-label">Exposure / watch</div><div class="v-num" style="font-size:36px">68.4%</div><p class="v-paragraph" style="color:#8a641c">6.6 points below the watch threshold.</p></article>
+<article class="v-card" style="background:#fce7f2"><div class="v-label">Retention</div><div class="v-num" style="font-size:36px">92.4%</div><span style="font-size:10px;color:#b64e81;font-weight:850">+2.1 pts</span></article>
+</div>
+<div class="v-grid two" style="grid-template-columns:.85fr 1.15fr;margin-top:15px"><article class="v-card"><div class="v-head"><div><h3 class="v-title">Signal mix</h3><div class="v-sub">Composition of the current read</div></div></div><div class="v-statrow"><span>Momentum</span><b>42%</b></div><div class="v-bar"><span style="width:42%"></span></div><div class="v-statrow"><span>Quality</span><b>27%</b></div><div class="v-bar"><span style="width:27%;background:#35c99a"></span></div><div class="v-statrow"><span>Risk watch</span><b>18%</b></div><div class="v-bar"><span style="width:18%;background:#ffad50"></span></div></article><article class="v-card"><h3 class="v-title">Analyst takeaway</h3><p class="v-paragraph" style="font-size:13px;color:#15213d">A lively signal wall is useful for scanning multiple dimensions quickly. Keep one clear reading order: main outcome first, quality second, risk third.</p><div class="v-divider"></div><div class="v-statrow"><span>Primary signal</span><b class="v-change">Positive</b></div><div class="v-statrow"><span>Need to inspect</span><b style="color:#b67b24">Concentration</b></div></article></div>
+<div class="concept-extension ext-grid">
+<div class="ext-grid ext-two"><article class="ext-panel" style="background:#e4edff"><div class="ext-label">Big-picture summary</div><h3 style="font-size:22px;line-height:1.15;margin:10px 0">A positive run with one visible constraint.</h3><p class="ext-copy" style="color:#415983;font-size:11px">Momentum is improving across the headline indicators. Keep the concentration indicator prominent so the growth story does not hide risk.</p><ul class="ext-bullets"><li>Revenue up 10.76%</li><li>Retention at 92.4%</li><li>Exposure at 68.4%</li></ul></article><article class="ext-panel" style="background:#e0f8ef"><div class="ext-label">Growth distribution</div><div class="ext-value">42%</div><p class="ext-copy">Share of result from the core segment.</p><div class="ext-treemap"><div style="grid-row:span 2;background:#3485ff"><small>CORE</small><strong>42%</strong></div><div style="background:#35c99a"><small>GROWTH</small><strong>27%</strong></div><div style="background:#9b70ff"><small>OTHER</small><strong>31%</strong></div></div></article></div>
+<div class="ext-grid ext-three"><article class="ext-panel"><div class="ext-label">Revenue</div><div class="ext-value">₹33.7K</div><span class="ext-chip">+10.76%</span></article><article class="ext-panel"><div class="ext-label">Orders</div><div class="ext-value">1,420</div><span class="ext-chip">+12.45%</span></article><article class="ext-panel"><div class="ext-label">Risk</div><div class="ext-value">68.4%</div><span class="ext-chip watch">Watch</span></article></div>
+<article class="ext-panel"><div class="ext-head"><div><h3>Trend strip</h3><p>Wide time-series accent within the mosaic</p></div><span class="ext-chip">Latest</span></div><svg class="ext-series" viewbox="0 0 680 135"><path d="M20 110 75 99 130 105 185 79 240 86 295 62 350 70 405 42 460 51 515 30 570 35 650 12" fill="none" stroke="#3485ff" stroke-linejoin="round" stroke-width="4"></path><text x="20" y="128">Sep</text><text text-anchor="middle" x="335" y="128">Oct</text><text text-anchor="end" x="650" y="128">Now</text></svg></article>
+<article class="ext-panel"><div class="ext-head"><div><h3>Color-coded data table</h3><p>Compare the same signals without treating them equally</p></div></div><div class="ext-table-scroll"><table class="ext-table"><thead><tr><th>Signal</th><th>Value</th><th>Change</th><th>Signal state</th></tr></thead><tbody><tr><td>Revenue</td><td>₹33,678</td><td>+10.76%</td><td>Positive</td></tr><tr><td>Orders</td><td>1,420</td><td>+12.45%</td><td>Positive</td></tr><tr><td>Retention</td><td>92.4%</td><td>+2.1 pts</td><td>Stable</td></tr><tr><td>Exposure</td><td>68.4%</td><td>+4.2 pts</td><td>Watch</td></tr></tbody></table></div></article>
+</div></div></section><section class="concept-view" id="concept-8"><div class="v-wrap style-liquid">
+<div class="v-grid two" style="grid-template-columns:1.1fr .9fr">
+<article class="v-card" style="padding:25px"><div class="v-label">Liquid signal / current read</div><div style="display:flex;align-items:center;gap:18px;margin-top:18px"><div class="liquid-orb" style="height:130px;width:130px;flex-shrink:0;display:grid;place-items:center"><strong style="font-size:29px">82</strong></div><div><div class="v-num" style="margin-top:0">Signal rising</div><p class="v-paragraph">Revenue momentum and retention are positive. Exposure is the counter-signal to keep in view.</p><span class="v-pill" style="margin-top:10px">Confidence 86%</span></div></div></article>
+<article class="v-card"><div class="v-head"><div><h3 class="v-title">Metric bubbles</h3><div class="v-sub">Rounded forms group related numbers by theme</div></div></div><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center;padding:5px 0"><div class="liquid-orb" style="width:125px;height:125px;display:grid;place-content:center;text-align:center"><b style="font-size:25px">₹33.7K</b><small>Revenue</small></div><div class="liquid-orb" style="width:100px;height:100px;display:grid;place-content:center;text-align:center"><b style="font-size:21px">1,420</b><small>Orders</small></div><div class="liquid-orb" style="width:88px;height:88px;display:grid;place-content:center;text-align:center"><b style="font-size:18px">92.4%</b><small>Retention</small></div></div></article>
+</div>
+<article class="v-card" style="margin-top:15px"><div class="v-head"><div><h3 class="v-title">Fluid revenue stream</h3><div class="v-sub">The curve carries the visual emphasis; labels stay quiet</div></div><span class="v-pill">+10.76%</span></div><svg class="v-chart" viewbox="0 0 950 260"><defs><lineargradient id="liquidfill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3485ff" stop-opacity=".3"></stop><stop offset="1" stop-color="#35c99a" stop-opacity=".02"></stop></lineargradient></defs><g class="v-gridline"><path d="M45 40H915M45 90H915M45 140H915M45 190H915"></path></g><path d="M45 170 C100 145 128 193 180 155 S260 169 315 125 S393 153 440 106 S520 130 578 85 S656 108 710 59 S804 76 855 43 S896 48 915 34 L915 210H45Z" fill="url(#liquidfill)"></path><path d="M45 170 C100 145 128 193 180 155 S260 169 315 125 S393 153 440 106 S520 130 578 85 S656 108 710 59 S804 76 855 43 S896 48 915 34" fill="none" stroke="#3485ff" stroke-linecap="round" stroke-width="4"></path><circle cx="710" cy="59" fill="#fff" r="7" stroke="#35c99a" stroke-width="4"></circle><text text-anchor="middle" x="710" y="43">Inflection</text><text x="45" y="238">Earlier</text><text text-anchor="end" x="915" y="238">Now</text></svg></article>
+<div class="v-grid three" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:15px"><article class="v-card"><div class="v-label">Growth</div><div class="v-num">+10.76%</div><p class="v-paragraph">Revenue is above baseline.</p></article><article class="v-card"><div class="v-label">Quality</div><div class="v-num">92.4%</div><p class="v-paragraph">Retention remains steady.</p></article><article class="v-card"><div class="v-label">Counter-signal</div><div class="v-num">68.4%</div><p class="v-paragraph">Exposure is nearing its watch threshold.</p></article></div>
+<div class="concept-extension ext-grid">
+<article class="ext-panel" style="display:grid;grid-template-columns:.85fr 1.15fr;align-items:center;gap:18px"><div><div class="liquid-orb" style="width:115px;height:115px;display:grid;place-content:center;text-align:center"><b style="font-size:28px">82</b><small>signal</small></div></div><div><div class="ext-label">Liquid summary</div><h3 style="font-size:21px;line-height:1.2;margin:9px 0">Momentum is flowing upward.</h3><p class="ext-copy">Revenue and orders are growing, with retention steady. Concentration is the ripple to inspect before scaling risk.</p><ul class="ext-bullets"><li>Revenue +10.76%</li><li>Orders +12.45%</li><li>Exposure 68.4% — watch</li></ul></div></article>
+<div class="ext-grid ext-three"><article class="ext-panel"><div class="ext-label">Revenue</div><div class="ext-value">₹33.7K</div><div class="ext-bar"><span style="width:78%"></span></div></article><article class="ext-panel"><div class="ext-label">Retention</div><div class="ext-value">92.4%</div><div class="ext-bar"><span style="width:92%;background:#35c99a"></span></div></article><article class="ext-panel"><div class="ext-label">Confidence</div><div class="ext-value">86 / 100</div><div class="ext-bar"><span style="width:86%;background:#9b70ff"></span></div></article></div>
+<article class="ext-panel"><div class="ext-head"><div><h3>Liquid time series</h3><p>Soft curve with a highlighted moment</p></div><span class="ext-chip">Inflection</span></div><svg class="ext-series" viewbox="0 0 680 150"><defs><lineargradient id="liquidExt" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3485ff" stop-opacity=".25"></stop><stop offset="1" stop-color="#35c99a" stop-opacity=".02"></stop></lineargradient></defs><path d="M25 116 C75 95 90 127 135 92 S198 111 240 77 S300 90 342 60 S402 75 445 45 S505 60 550 28 S620 35 655 16 L655 130H25Z" fill="url(#liquidExt)"></path><path d="M25 116 C75 95 90 127 135 92 S198 111 240 77 S300 90 342 60 S402 75 445 45 S505 60 550 28 S620 35 655 16" fill="none" stroke="#3485ff" stroke-linecap="round" stroke-width="3.2"></path><text x="25" y="145">Earlier</text><text text-anchor="end" x="655" y="145">Now</text></svg></article>
+<article class="ext-panel"><div class="ext-head"><div><h3>Evidence pool</h3><p>Compact list under the fluid visual layer</p></div></div><div class="ext-table-scroll"><table class="ext-table"><thead><tr><th>Metric</th><th>Current</th><th>Change</th><th>Status</th></tr></thead><tbody><tr><td>Revenue</td><td>₹33,678</td><td>+10.76%</td><td>Positive</td></tr><tr><td>Orders</td><td>1,420</td><td>+12.45%</td><td>Positive</td></tr><tr><td>Retention</td><td>92.4%</td><td>+2.1 pts</td><td>Stable</td></tr><tr><td>Exposure</td><td>68.4%</td><td>+4.2 pts</td><td>Watch</td></tr></tbody></table></div><p class="ext-copy">Curved surfaces are decorative; trend direction and exact values remain explicit.</p></article>
+</div></div></section><section class="concept-view" id="concept-9"><div class="v-wrap style-spatial">
+<div class="v-grid two" style="grid-template-columns:1.2fr .8fr">
+<article class="v-card" style="background:linear-gradient(145deg,#e1eaff,#f7fbff);min-height:415px"><div class="v-head"><div><h3 class="v-title">Signal constellation</h3><div class="v-sub">A central score with supporting drivers around it</div></div><span class="v-pill">4 drivers</span></div>
+<div style="height:300px;position:relative;max-width:720px;margin:auto"><svg style="width:100%;height:100%;position:absolute;inset:0" viewbox="0 0 680 300"><ellipse cx="340" cy="150" fill="none" rx="160" ry="77" stroke="#92abd633" stroke-dasharray="4 5"></ellipse><ellipse cx="340" cy="150" fill="none" rx="265" ry="123" stroke="#92abd633" stroke-dasharray="4 5"></ellipse><path d="M340 150L80 45M340 150L600 45M340 150L80 252M340 150L600 252" stroke="#92abd655"></path></svg>
+<div class="spatial-center" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:118px;height:118px;border-radius:50%;display:grid;place-content:center;text-align:center;border:1px solid white"><b style="font-size:32px">82</b><small>Signal strength</small></div>
+<div class="spatial-node" style="position:absolute;left:0;top:6%;background:#fff;border:1px solid white;padding:12px;border-radius:14px"><small class="v-muted">Revenue</small><div style="font-size:18px;font-weight:850">+10.8%</div></div>
+<div class="spatial-node" style="position:absolute;right:0;top:6%;background:#fff;border:1px solid white;padding:12px;border-radius:14px"><small class="v-muted">Exposure</small><div style="font-size:18px;font-weight:850">68.4%</div></div>
+<div class="spatial-node" style="position:absolute;left:0;bottom:5%;background:#fff;border:1px solid white;padding:12px;border-radius:14px"><small class="v-muted">Retention</small><div style="font-size:18px;font-weight:850">92.4%</div></div>
+<div class="spatial-node" style="position:absolute;right:0;bottom:5%;background:#fff;border:1px solid white;padding:12px;border-radius:14px"><small class="v-muted">Confidence</small><div style="font-size:18px;font-weight:850">86 / 100</div></div></div></article>
+<div class="v-grid"><article class="v-card"><h3 class="v-title">Relationship map</h3><svg class="v-chart" style="margin-top:15px" viewbox="0 0 400 235"><path d="M200 115L75 48M200 115L325 48M200 115L75 185M200 115L325 185" stroke="#a8bddf" stroke-width="2"></path><circle cx="200" cy="115" fill="#dce8ff" r="39" stroke="#3485ff" stroke-width="2"></circle><circle cx="75" cy="48" fill="#fff" r="26" stroke="#35c99a" stroke-width="2"></circle><circle cx="325" cy="48" fill="#fff" r="26" stroke="#ffad50" stroke-width="2"></circle><circle cx="75" cy="185" fill="#fff" r="26" stroke="#9b70ff" stroke-width="2"></circle><circle cx="325" cy="185" fill="#fff" r="26" stroke="#3485ff" stroke-width="2"></circle><g fill="#15213d" font-size="10" text-anchor="middle"><text style="font-weight:850" x="200" y="111">Signal</text><text x="200" y="124">82</text><text x="75" y="52">Rev.</text><text x="325" y="52">Risk</text><text x="75" y="189">Ret.</text><text x="325" y="189">Conf.</text></g></svg></article><article class="v-card"><h3 class="v-title">Current interpretation</h3><p class="v-paragraph" style="font-size:12px;color:#15213d">Revenue momentum and retention support the positive signal. Rising exposure is the main counterweight. The connected layout helps show these as related drivers rather than isolated numbers.</p></article></div>
+</div>
+<div class="concept-extension ext-grid">
+<div class="ext-grid ext-two"><article class="ext-panel"><div class="ext-head"><div><h3>Spatial readout</h3><p>Metrics as connected drivers</p></div><span class="ext-chip">4 factors</span></div><p class="ext-copy" style="font-size:12px">The central signal is positive due to revenue momentum and stable retention. Rising exposure is the counterweight. Read the indicators together rather than isolating a single metric.</p><ul class="ext-bullets"><li>Revenue supports the current signal.</li><li>Retention remains a quality anchor.</li><li>Exposure is the key counter-signal.</li></ul></article><article class="ext-panel"><h3>Driver weights</h3><div class="ext-rankbar"><span>Revenue</span><div class="track"><span style="width:82%"></span></div><b>82</b></div><div class="ext-rankbar"><span>Orders</span><div class="track"><span style="width:79%;background:#35c99a"></span></div><b>79</b></div><div class="ext-rankbar"><span>Retention</span><div class="track"><span style="width:63%;background:#9b70ff"></span></div><b>63</b></div><div class="ext-rankbar"><span>Risk</span><div class="track"><span style="width:42%;background:#ffad50"></span></div><b>42</b></div></article></div>
+<article class="ext-panel"><div class="ext-head"><div><h3>Signal path through time</h3><p>Current state relative to earlier checkpoints</p></div><span class="ext-chip">82 / 100</span></div><svg class="ext-series" viewbox="0 0 680 150"><g class="gridline"><path d="M25 25H655M25 65H655M25 105H655"></path></g><path d="M25 119 80 111 135 117 190 88 245 96 300 73 355 81 410 52 465 59 520 35 575 41 655 18" fill="none" stroke="#3485ff" stroke-width="3"></path><text x="25" y="142">Start</text><text text-anchor="end" x="655" y="142">Now</text></svg></article>
+<article class="ext-panel"><h3>Relationship detail table</h3><div class="ext-table-scroll"><table class="ext-table"><thead><tr><th>Driver</th><th>Value</th><th>Signal relation</th><th>Read</th></tr></thead><tbody><tr><td>Revenue</td><td>+10.76%</td><td>Supports signal</td><td>Positive</td></tr><tr><td>Orders</td><td>+12.45%</td><td>Supports signal</td><td>Positive</td></tr><tr><td>Retention</td><td>92.4%</td><td>Quality anchor</td><td>Stable</td></tr><tr><td>Exposure</td><td>68.4%</td><td>Counter-signal</td><td>Watch</td></tr></tbody></table></div><p class="ext-copy">Associations show co-movement, not proof of causality.</p></article>
+</div></div></section><section class="concept-view" id="concept-10"><div class="v-wrap style-story">
+<div class="v-grid two" style="grid-template-columns:1.2fr .8fr">
+<article class="v-card story-lead"><div class="v-label">AI analysis summary</div><h2>Growth is positive; the source of growth needs attention.</h2><p class="v-paragraph" style="font-size:12px;color:#50688f">Revenue rose 10.76% and retention stayed strong. The core segment remains the largest contributor, while exposure is also rising. Review concentration before increasing risk budget.</p><div style="display:flex;gap:8px;margin-top:17px;flex-wrap:wrap"><span class="v-pill">Growth positive</span><span class="v-pill" style="background:#fff0d8;color:#a66b15">Risk watch</span></div></article>
+<article class="v-card"><div class="v-label">Executive score</div><div class="v-num" style="font-size:54px">82<span style="font-size:15px;color:var(--mutedv)"> / 100</span></div><div class="v-bar"><span style="width:82%"></span></div><p class="v-paragraph">Overall signal strength</p><div class="v-divider"></div><div class="v-statrow"><span>Confidence</span><b>86%</b></div><div class="v-statrow"><span>Risk state</span><b style="color:#b67b24">Watch</b></div></article>
+</div>
+<div class="v-grid three" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:15px"><article class="v-card"><div class="v-label">What improved</div><h3 class="v-title" style="margin-top:11px">Revenue momentum</h3><p class="v-paragraph">The trend moved above baseline in the second half of the period and orders strengthened alongside it.</p></article><article class="v-card"><div class="v-label">What stayed stable</div><h3 class="v-title" style="margin-top:11px">Retention quality</h3><p class="v-paragraph">Retention is 92.4%, providing a positive quality signal alongside the improvement in volume.</p></article><article class="v-card"><div class="v-label">What needs review</div><h3 class="v-title" style="margin-top:11px">Segment concentration</h3><p class="v-paragraph">The largest segment accounts for 42% of the result. Check sensitivity before scaling further.</p></article></div>
+<div class="v-grid two" style="grid-template-columns:1.2fr .8fr;margin-top:15px"><article class="v-card"><div class="v-head"><div><h3 class="v-title">Evidence behind the summary</h3><div class="v-sub">Metric trends that support each statement</div></div></div><table class="v-table"><thead><tr><th>Evidence</th><th>Observation</th><th>Reading</th></tr></thead><tbody><tr><td>Revenue</td><td>+10.76%</td><td>Positive</td></tr><tr><td>Retention</td><td>92.4%</td><td>Stable</td></tr><tr><td>Exposure</td><td>68.4%</td><td>Watch</td></tr><tr><td>Confidence</td><td>86 / 100</td><td>High</td></tr></tbody></table></article><article class="v-card"><h3 class="v-title">Suggested next step</h3><p class="v-paragraph" style="font-size:13px;color:#15213d">Compare segment-level growth and downside sensitivity before increasing the portfolio's risk budget.</p></article></div>
+<div class="concept-extension ext-grid">
+<article class="ext-panel"><div class="ext-head"><div><h3>Evidence summary</h3><p>Concise points supporting the AI conclusion</p></div><span class="ext-chip">Analysis complete</span></div><ul class="ext-bullets"><li><b>Growth:</b>  revenue is up 10.76% and orders are up 12.45%.</li><li><b>Quality:</b>  retention remains healthy at 92.4%.</li><li><b>Concentration:</b>  the core segment contributes 42% of total performance.</li><li><b>Risk:</b>  exposure is 68.4%, below the 75% watch line.</li></ul><p class="ext-copy">Treat this as an analytical summary of the demo figures. Validate against source data before acting.</p></article>
+<div class="ext-grid ext-three"><article class="ext-panel"><div class="ext-label">Revenue</div><div class="ext-value">₹33,678</div><span class="ext-chip">+10.76%</span></article><article class="ext-panel"><div class="ext-label">Retention</div><div class="ext-value">92.4%</div><span class="ext-chip">Stable</span></article><article class="ext-panel"><div class="ext-label">Risk</div><div class="ext-value">68.4%</div><span class="ext-chip watch">Watch</span></article></div>
+<div class="ext-grid ext-two"><article class="ext-panel"><div class="ext-head"><div><h3>Trend that supports the summary</h3><p>Time series from start to current period</p></div></div><svg class="ext-series" viewbox="0 0 680 145"><g class="gridline"><path d="M25 25H655M25 65H655M25 105H655"></path></g><path d="M25 120 80 108 135 115 190 86 245 93 300 68 355 78 410 49 465 59 520 32 575 39 655 17" fill="none" stroke="#3485ff" stroke-width="3"></path><text x="25" y="138">Earlier</text><text text-anchor="end" x="655" y="138">Now</text></svg></article><article class="ext-panel"><h3>Priority for follow-up</h3><div class="ext-number-band"><div><strong>42%</strong><small>Core contribution</small></div><div><strong>6.6 pts</strong><small>To watch threshold</small></div></div><p class="ext-copy">Analyze how concentrated the growth is and whether smaller segments can sustainably expand.</p></article></div>
+<article class="ext-panel"><div class="ext-head"><div><h3>Evidence ledger</h3><p>Values behind the narrative and their interpretation</p></div></div><div class="ext-table-scroll"><table class="ext-table"><thead><tr><th>Evidence</th><th>Current</th><th>Change</th><th>Interpretation</th></tr></thead><tbody><tr><td>Revenue</td><td>₹33,678</td><td>+10.76%</td><td>Momentum improved</td></tr><tr><td>Orders</td><td>1,420</td><td>+12.45%</td><td>Volume improving</td></tr><tr><td>Retention</td><td>92.4%</td><td>+2.1 pts</td><td>Quality stable</td></tr><tr><td>Exposure</td><td>68.4%</td><td>+4.2 pts</td><td>Monitor</td></tr></tbody></table></div></article>
+</div></div></section><section class="concept-view" id="concept-11"><div class="v-wrap style-timeseries">
+<div class="v-grid two" style="grid-template-columns:1fr auto;align-items:end">
+<div><div class="v-label">Revenue timeline</div><div class="v-num ts-number" style="font-size:60px">₹33,678</div><div class="v-change">↗ 10.76% <span class="v-muted">vs previous period</span></div></div><div style="display:flex;gap:7px;flex-wrap:wrap"><span class="range-pill">7D</span><span class="range-pill">30D</span><span class="range-pill" style="background:#dce8ff;color:#315dbe">90D</span><span class="range-pill">1Y</span></div>
+</div>
+<article class="v-card timeseries-hero" style="margin-top:16px"><div class="v-head"><div><h3 class="v-title">Revenue through time</h3><div class="v-sub">Trend takes center stage; KPIs and events annotate the curve.</div></div><span class="v-pill">Rising trend</span></div><svg class="v-chart" viewbox="0 0 1100 360"><defs><lineargradient id="tsBlueFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3485ff" stop-opacity=".25"></stop><stop offset="1" stop-color="#3485ff" stop-opacity="0"></stop></lineargradient></defs><g class="v-gridline"><path d="M55 45H1050M55 100H1050M55 155H1050M55 210H1050M55 265H1050"></path><path d="M55 45V265M180 45V265M305 45V265M430 45V265M555 45V265M680 45V265M805 45V265M930 45V265M1050 45V265"></path></g><g><text x="8" y="269">₹0</text><text x="8" y="214">₹10K</text><text x="8" y="159">₹20K</text><text x="8" y="104">₹30K</text><text x="8" y="49">₹40K</text></g><path d="M55 225 C100 202 130 236 180 208 S250 224 305 177 S370 191 430 160 S495 178 555 125 S625 149 680 105 S760 117 805 77 S900 91 930 62 S1010 72 1050 37 L1050 265H55Z" fill="url(#tsBlueFill)"></path><path d="M55 225 C100 202 130 236 180 208 S250 224 305 177 S370 191 430 160 S495 178 555 125 S625 149 680 105 S760 117 805 77 S900 91 930 62 S1010 72 1050 37" fill="none" stroke="#3485ff" stroke-linecap="round" stroke-width="4"></path><path d="M55 232 C180 224 305 210 430 195 S680 178 805 147 S930 132 1050 121" fill="none" stroke="#9eb2d6" stroke-dasharray="6 6" stroke-width="2"></path><path d="M680 105V265" stroke="#3485ff" stroke-dasharray="5 5"></path><circle cx="680" cy="105" fill="#fff" r="7" stroke="#3485ff" stroke-width="4"></circle><rect fill="#15213d" height="27" rx="8" width="92" x="634" y="67"></rect><text style="fill:#fff;font-weight:800" text-anchor="middle" x="680" y="84">Inflection</text><g><text x="55" y="300">Sep 1</text><text x="250" y="300">Sep 15</text><text x="430" y="300">Oct 1</text><text x="610" y="300">Oct 15</text><text x="820" y="300">Nov 1</text><text text-anchor="end" x="1050" y="300">Now</text></g><rect fill="#dbe5f6" height="9" rx="5" width="995" x="55" y="323"></rect><rect fill="#8ab4ff" height="9" rx="5" width="710" x="55" y="323"></rect><rect fill="#3485ff" height="19" rx="3" width="7" x="765" y="318"></rect></svg><div class="v-legend"><span><i style="background:#3485ff"></i>Revenue actual</span><span><i style="background:#9eb2d6"></i>Previous trend</span><span>Shaded strip = timeline overview</span></div></article>
+<div class="v-grid three" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:15px"><article class="v-card"><div class="v-label">Period high</div><div class="v-num">₹38,450</div><span class="v-muted">Observed peak</span></article><article class="v-card"><div class="v-label">Current slope</div><div class="v-num">+10.76%</div><span class="v-change">Positive momentum</span></article><article class="v-card"><div class="v-label">Key event</div><div class="v-num" style="font-size:25px">Baseline break</div><span class="v-muted">Second half of period</span></article></div>
+<div class="concept-extension ext-grid">
+<div class="ext-grid ext-three"><article class="ext-panel"><div class="ext-label">Period high</div><div class="ext-value">₹38,450</div><p class="ext-copy">Peak observed point</p></article><article class="ext-panel"><div class="ext-label">Period change</div><div class="ext-value">+10.76%</div><p class="ext-copy">Compared with baseline</p></article><article class="ext-panel"><div class="ext-label">Retention</div><div class="ext-value">92.4%</div><p class="ext-copy">Quality indicator</p></article></div>
+<article class="ext-panel"><div class="ext-head"><div><h3>What the time series suggests</h3><p>Summary and key observations</p></div></div><p class="ext-copy" style="font-size:12px">The line rises through the later part of the period and finishes above the previous trend. The move is supportive, but a larger peak does not on its own establish a durable shift.</p><ul class="ext-bullets"><li>Momentum strengthened near the midpoint of the series.</li><li>Current revenue is ₹33,678 versus a previous-period baseline.</li><li>Check contribution breadth before interpreting the move as broad-based.</li></ul></article>
+<div class="ext-grid ext-two"><article class="ext-panel"><div class="ext-head"><div><h3>Current vs previous checkpoints</h3><p>Numeric comparison table</p></div></div><div class="ext-table-scroll"><table class="ext-table"><thead><tr><th>Checkpoint</th><th>Current</th><th>Previous</th><th>Difference</th></tr></thead><tbody><tr><td>Revenue</td><td>₹33,678</td><td>₹30,410</td><td>+₹3,268</td></tr><tr><td>Peak</td><td>₹38,450</td><td>₹34,900</td><td>+₹3,550</td></tr><tr><td>Retention</td><td>92.4%</td><td>90.3%</td><td>+2.1 pts</td></tr><tr><td>Exposure</td><td>68.4%</td><td>64.2%</td><td>+4.2 pts</td></tr></tbody></table></div></article><article class="ext-panel"><h3>Context</h3><p class="ext-copy" style="font-size:12px">Read this chart with the table, not in isolation. The peak shows the strongest point, while the latest value and previous period comparison show whether the current endpoint is sustaining the trend.</p></article></div>
+</div></div></section><section class="concept-view" id="concept-12"><div class="v-wrap style-waterfall">
+<div class="v-head"><div><h2 class="v-title">What moved the result?</h2><div class="v-sub">A contribution bridge explains how the total changed, driver by driver.</div></div><span class="v-pill">Attribution view</span></div>
+<div class="v-grid two" style="grid-template-columns:1.2fr .8fr">
+<article class="v-card"><div class="v-head"><div><h3 class="v-title">Revenue bridge</h3><div class="v-sub">Illustrative start-to-finish movement</div></div></div><svg class="v-chart" viewbox="0 0 750 340"><g class="v-gridline"><path d="M30 45H720M30 100H720M30 155H720M30 210H720M30 265H720"></path></g><g><text x="0" y="269">0</text><text x="0" y="214">10K</text><text x="0" y="159">20K</text><text x="0" y="104">30K</text><text x="0" y="49">40K</text></g><rect fill="#a8bad8" height="167" rx="5" width="78" x="55" y="98"></rect><path d="M133 98H172" stroke="#93a7c8" stroke-dasharray="4 4"></path><rect fill="#35c99a" height="32" rx="5" width="78" x="172" y="66"></rect><path d="M250 66H289" stroke="#93a7c8" stroke-dasharray="4 4"></path><rect fill="#35c99a" height="14" rx="5" width="78" x="289" y="52"></rect><path d="M367 52H406" stroke="#93a7c8" stroke-dasharray="4 4"></path><rect fill="#f58bc0" height="9" rx="4" width="78" x="406" y="52"></rect><path d="M484 61H523" stroke="#93a7c8" stroke-dasharray="4 4"></path><rect fill="#f58bc0" height="5" rx="3" width="78" x="523" y="61"></rect><path d="M601 66H637" stroke="#93a7c8" stroke-dasharray="4 4"></path><rect fill="#3485ff" height="199" rx="5" width="78" x="637" y="66"></rect><g font-weight="800" text-anchor="middle"><text style="fill:#15213d" x="94" y="86">30.4K</text><text style="fill:#139c72" x="211" y="54">+5.8K</text><text style="fill:#139c72" x="328" y="40">+2.1K</text><text style="fill:#c84e6c" x="445" y="85">−1.4K</text><text style="fill:#c84e6c" x="562" y="88">−0.6K</text><text style="fill:#3485ff" x="676" y="52">36.3K</text></g><g><text text-anchor="middle" x="94" y="291">Start</text><text text-anchor="middle" x="211" y="291">Core</text><text text-anchor="middle" x="328" y="291">New biz</text><text text-anchor="middle" x="445" y="291">Churn</text><text text-anchor="middle" x="562" y="291">Costs</text><text text-anchor="middle" x="676" y="291">End</text></g></svg></article>
+<article class="v-card"><div class="v-label">Net change</div><div class="v-num" style="font-size:45px;color:#139c72">+₹3.27K</div><p class="v-paragraph">Positive contributions outweighed churn and other costs. The bridge shows the source of movement instead of only the final KPI.</p><div class="v-divider"></div><div class="v-statrow"><span>Starting revenue</span><b>₹30.4K</b></div><div class="v-statrow"><span>Positive drivers</span><b style="color:#139c72">+₹7.9K</b></div><div class="v-statrow"><span>Offsets</span><b style="color:#c84e6c">−₹2.0K</b></div><div class="v-statrow"><span>Ending revenue</span><b>₹36.3K</b></div></article>
+</div>
+<div class="v-card" style="margin-top:15px"><div class="v-head"><div><h3 class="v-title">Contribution details</h3><div class="v-sub">Exact values alongside the bridge</div></div></div><table class="v-table"><thead><tr><th>Driver</th><th>Impact</th><th>Direction</th><th>Interpretation</th></tr></thead><tbody><tr><td>Core segment</td><td>+₹5.8K</td><td style="color:#139c72">Positive</td><td>Largest upside</td></tr><tr><td>New business</td><td>+₹2.1K</td><td style="color:#139c72">Positive</td><td>Additional contribution</td></tr><tr><td>Churn</td><td>−₹1.4K</td><td style="color:#c84e6c">Negative</td><td>Value lost</td></tr><tr><td>Other costs</td><td>−₹0.6K</td><td style="color:#c84e6c">Negative</td><td>Offset to gains</td></tr></tbody></table></div>
+<div class="concept-extension ext-grid">
+<article class="ext-panel"><div class="ext-head"><div><h3>Trend context</h3><p>Time series paired with the contribution bridge</p></div><span class="ext-chip">+10.76%</span></div><svg class="ext-series" viewbox="0 0 680 145"><g class="gridline"><path d="M25 25H655M25 65H655M25 105H655"></path></g><path d="M25 119 80 112 135 116 190 88 245 95 300 69 355 77 410 51 465 59 520 32 575 40 655 18" fill="none" stroke="#3485ff" stroke-width="3"></path><text x="25" y="138">Earlier</text><text text-anchor="end" x="655" y="138">Now</text></svg></article>
+<article class="ext-panel"><div class="ext-head"><div><h3>Bridge interpretation</h3><p>Key findings in the movement</p></div></div><ul class="ext-bullets"><li>Core segment is the largest positive contributor.</li><li>New business adds incremental movement.</li><li>Churn and cost offsets reduce gross gains.</li></ul><p class="ext-copy">Check the definitions and reconciliation rules before using a bridge for financial reporting.</p></article>
+<article class="ext-panel"><div class="ext-head"><div><h3>Reconciled driver table</h3><p>Contributions behind the result</p></div></div><div class="ext-table-scroll"><table class="ext-table"><thead><tr><th>Driver</th><th>Impact</th><th>Direction</th><th>Reading</th></tr></thead><tbody><tr><td>Core segment</td><td>+₹5.8K</td><td>Positive</td><td>Largest driver</td></tr><tr><td>New business</td><td>+₹2.1K</td><td>Positive</td><td>Added growth</td></tr><tr><td>Churn</td><td>−₹1.4K</td><td>Negative</td><td>Revenue lost</td></tr><tr><td>Other costs</td><td>−₹0.6K</td><td>Negative</td><td>Offset</td></tr></tbody></table></div></article>
+</div></div></section><section class="concept-view" id="concept-13"><div class="v-wrap style-treemap">
+<div class="v-head"><div><h2 class="v-title">Contribution map</h2><div class="v-sub">Use area and placement to make relative importance visible at a glance.</div></div><span class="v-pill">Segment mix</span></div>
+<div class="v-grid two" style="grid-template-columns:1.2fr .8fr">
+<article class="v-card"><div class="v-head"><div><h3 class="v-title">Revenue by segment</h3><div class="v-sub">Area represents share of total contribution</div></div></div><div style="display:grid;grid-template-columns:1.1fr .9fr;grid-template-rows:160px 120px;gap:9px"><div class="treebox" style="grid-row:span 2;background:linear-gradient(145deg,#3485ff,#6d99ff)"><small>CORE SEGMENT</small><strong>42%</strong><div style="font-size:10px">₹14,966<br/>+14.2% growth</div></div><div class="treebox" style="background:linear-gradient(145deg,#20b88e,#78dfbd)"><small>GROWTH</small><strong>27%</strong><div style="font-size:10px">+8.1%</div></div><div class="treebox" style="background:linear-gradient(145deg,#ffad50,#ffd18d);color:#49351b"><small>WATCH</small><strong>18%</strong><div style="font-size:10px">Concentration</div></div><div class="treebox" style="grid-column:2;background:linear-gradient(145deg,#9b70ff,#c0aaff)"><small>EMERGING</small><strong>13%</strong><div style="font-size:10px">+5.6%</div></div></div></article>
+<article class="v-card"><h3 class="v-title">Ranked composition</h3><table class="v-table" style="margin-top:15px"><thead><tr><th>Segment</th><th>Share</th><th>Trend</th></tr></thead><tbody><tr><td>Core</td><td>42%</td><td style="color:#139c72">↗</td></tr><tr><td>Growth</td><td>27%</td><td style="color:#139c72">↗</td></tr><tr><td>Watch</td><td>18%</td><td style="color:#bd7b1c">!</td></tr><tr><td>Emerging</td><td>13%</td><td style="color:#139c72">↗</td></tr></tbody></table><div class="v-divider"></div><p class="v-paragraph" style="font-size:12px;color:#15213d">The primary segment contributes over two-fifths of the result. A treemap shows this dependency before the viewer reads the percentages.</p></article>
+</div>
+<div class="v-grid three" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:15px"><article class="v-card"><div class="v-label">Largest contributor</div><div class="v-num">42%</div><span class="v-muted">Core segment</span></article><article class="v-card"><div class="v-label">Emerging share</div><div class="v-num">13%</div><span class="v-muted">Room to diversify</span></article><article class="v-card"><div class="v-label">Top two combined</div><div class="v-num">69%</div><span class="v-muted">Core + growth</span></article></div>
+<div class="concept-extension ext-grid">
+<div class="ext-grid ext-two"><article class="ext-panel"><div class="ext-head"><div><h3>Contribution summary</h3><p>What the treemap says about mix</p></div><span class="ext-chip">42% core</span></div><p class="ext-copy" style="font-size:12px">The core segment supplies the largest single share. Growth and emerging segments are smaller, so diversification depends on whether those segments can increase without sacrificing retention.</p><ul class="ext-bullets"><li>Core is 42% of total contribution.</li><li>Growth is the second-largest segment at 27%.</li><li>Emerging contributes 13% and may provide diversification.</li></ul></article><article class="ext-panel"><div class="ext-label">Share distribution</div><div class="ext-treemap"><div style="grid-row:span 2;background:#3485ff"><small>CORE</small><strong>42%</strong></div><div style="background:#35c99a"><small>GROWTH</small><strong>27%</strong></div><div style="background:#ffad50"><small>WATCH</small><strong>18%</strong></div><div style="grid-column:2;background:#9b70ff"><small>EMERGING</small><strong>13%</strong></div></div></article></div>
+<article class="ext-panel"><div class="ext-head"><div><h3>Contribution trend</h3><p>Revenue trend over the same reporting window</p></div></div><svg class="ext-series" viewbox="0 0 680 145"><g class="gridline"><path d="M25 25H655M25 65H655M25 105H655"></path></g><path d="M25 116 80 104 135 112 190 84 245 93 300 67 355 74 410 47 465 58 520 30 575 38 655 17" fill="none" stroke="#3485ff" stroke-width="3"></path><text x="25" y="138">Earlier</text><text text-anchor="end" x="655" y="138">Now</text></svg></article>
+<article class="ext-panel"><div class="ext-head"><div><h3>Segment details</h3><p>Exact contributions with growth direction</p></div></div><div class="ext-table-scroll"><table class="ext-table"><thead><tr><th>Segment</th><th>Share</th><th>Approx. value</th><th>Growth</th></tr></thead><tbody><tr><td>Core</td><td>42%</td><td>₹14,966</td><td>+14.2%</td></tr><tr><td>Growth</td><td>27%</td><td>₹9,621</td><td>+8.1%</td></tr><tr><td>Watch</td><td>18%</td><td>₹6,414</td><td>−2.3%</td></tr><tr><td>Emerging</td><td>13%</td><td>₹4,632</td><td>+5.6%</td></tr></tbody></table></div></article>
+</div></div></section><section class="concept-view" id="concept-14"><div class="v-wrap style-funnel">
+<div class="v-head"><div><h2 class="v-title">Conversion journey</h2><div class="v-sub">Show volume retained at each stage and the drop-off between them.</div></div><span class="v-pill">42% end conversion</span></div>
+<div class="v-grid two" style="grid-template-columns:1.05fr .95fr">
+<article class="v-card"><div class="v-head"><div><h3 class="v-title">Stage funnel</h3><div class="v-sub">Funnel width corresponds to retained volume</div></div></div><div style="display:grid;gap:9px;padding:8px 0"><div class="funnelstep" style="width:100%;background:#376ef5"><span>Qualified audience</span><b>12,400</b></div><div class="funnelstep" style="width:85%;background:#5387ff"><span>Engaged</span><b>10,168</b></div><div class="funnelstep" style="width:67%;background:#81a5ff"><span>Intent</span><b>7,564</b></div><div class="funnelstep" style="width:48%;background:#35c99a"><span>Converted</span><b>5,208</b></div></div><div class="v-legend"><span>From qualified to converted</span><b>−58% total drop-off</b></div></article>
+<article class="v-card"><div class="v-head"><div><h3 class="v-title">Leakage analysis</h3><div class="v-sub">Prioritize stages where volume drops fastest</div></div></div><div class="v-statrow"><div><b>Qualification → Engagement</b><br/><span>2,232 left the funnel</span></div><b>−18%</b></div><div class="v-bar"><span style="width:82%"></span></div><div class="v-statrow"><div><b>Engagement → Intent</b><br/><span>2,604 left the funnel</span></div><b style="color:#bd7b1c">−26%</b></div><div class="v-bar"><span style="width:61%;background:#ffad50"></span></div><div class="v-statrow"><div><b>Intent → Conversion</b><br/><span>2,356 left the funnel</span></div><b style="color:#c84e6c">−31%</b></div><div class="v-bar"><span style="width:42%;background:#f58bc0"></span></div><p class="v-paragraph" style="font-size:12px;color:#15213d">The final stage has the highest proportional leakage. Improve the conversion experience before buying more top-of-funnel volume.</p></article>
+</div>
+<div class="v-card" style="margin-top:15px"><div class="v-head"><div><h3 class="v-title">Stage metrics</h3><div class="v-sub">A table for exact numbers that complement the funnel shape</div></div></div><table class="v-table"><thead><tr><th>Stage</th><th>Users</th><th>Retained</th><th>Drop from previous</th></tr></thead><tbody><tr><td>Qualified audience</td><td>12,400</td><td>100%</td><td>—</td></tr><tr><td>Engaged</td><td>10,168</td><td>82%</td><td>−18%</td></tr><tr><td>Intent</td><td>7,564</td><td>61%</td><td>−26%</td></tr><tr><td>Converted</td><td>5,208</td><td>42%</td><td>−31%</td></tr></tbody></table></div>
+<div class="concept-extension ext-grid">
+<article class="ext-panel"><div class="ext-head"><div><h3>Funnel summary</h3><p>What the shape tells us</p></div><span class="ext-chip">42% conversion</span></div><p class="ext-copy" style="font-size:12px">Volume decreases at each step. The final transition from intent to conversion has the largest proportional drop, making it the first place to investigate before scaling acquisition volume.</p><ul class="ext-bullets"><li>12,400 qualified users enter the journey.</li><li>5,208 users convert by the final stage.</li><li>The largest proportional drop is between intent and conversion.</li></ul></article>
+<div class="ext-grid ext-two"><article class="ext-panel"><div class="ext-head"><div><h3>Volume trend</h3><p>Time-series context behind the funnel</p></div></div><svg class="ext-series" viewbox="0 0 600 145"><g class="gridline"><path d="M25 25H575M25 65H575M25 105H575"></path></g><path d="M25 114 70 104 115 109 160 83 205 91 250 66 295 72 340 50 385 55 430 35 475 40 575 17" fill="none" stroke="#3485ff" stroke-width="3"></path><text x="25" y="138">Start</text><text text-anchor="end" x="575" y="138">Current</text></svg></article><article class="ext-panel"><div class="ext-label">Conversion quality</div><div class="ext-value">42%</div><div class="ext-bar"><span style="width:42%;background:#35c99a"></span></div><p class="ext-copy">Total retained volume relative to qualified audience.</p><div class="ext-line"></div><div class="ext-kpi-inline"><span>Largest stage loss</span><b>−31%</b></div></article></div>
+<article class="ext-panel"><div class="ext-head"><div><h3>Stage detail</h3><p>Values and drop-off retained for comparison</p></div></div><div class="ext-table-scroll"><table class="ext-table"><thead><tr><th>Stage</th><th>Users</th><th>Retained</th><th>Drop-off</th></tr></thead><tbody><tr><td>Qualified audience</td><td>12,400</td><td>100%</td><td>—</td></tr><tr><td>Engaged</td><td>10,168</td><td>82%</td><td>−18%</td></tr><tr><td>Intent</td><td>7,564</td><td>61%</td><td>−26%</td></tr><tr><td>Converted</td><td>5,208</td><td>42%</td><td>−31%</td></tr></tbody></table></div></article>
+</div></div></section><section class="concept-view" id="concept-15"><div class="v-wrap style-correlation">
+<div class="v-head"><div><h2 class="v-title">Metric relationship matrix</h2><div class="v-sub">Reveal which variables move together before choosing a single KPI to spotlight.</div></div><span class="v-pill">Pattern explorer</span></div>
+<div class="v-grid two" style="grid-template-columns:1.1fr .9fr">
+<article class="v-card"><div class="v-head"><div><h3 class="v-title">Correlation heatmap</h3><div class="v-sub">Illustrative coefficients from −1 to +1</div></div></div><div class="table-scroll"><table class="matrix"><thead><tr><th></th><th>Revenue</th><th>Orders</th><th>Retention</th><th>Risk</th><th>Signal</th></tr></thead><tbody>
+<tr><th style="text-align:left">Revenue</th><td style="background:#6d91f5;color:white">1.00</td><td style="background:#9bb6f9">.82</td><td style="background:#d3defb">.47</td><td style="background:#ffe1e8;color:#a44d67">−.31</td><td style="background:#a4bcfa">.76</td></tr>
+<tr><th style="text-align:left">Orders</th><td style="background:#9bb6f9">.82</td><td style="background:#6d91f5;color:white">1.00</td><td style="background:#c8d7fb">.51</td><td style="background:#f5eff9">−.18</td><td style="background:#9bb6f9">.79</td></tr>
+<tr><th style="text-align:left">Retention</th><td style="background:#d3defb">.47</td><td style="background:#c8d7fb">.51</td><td style="background:#6d91f5;color:white">1.00</td><td style="background:#ffe1e8;color:#a44d67">−.42</td><td style="background:#bdcef9">.63</td></tr>
+<tr><th style="text-align:left">Risk</th><td style="background:#ffe1e8;color:#a44d67">−.31</td><td style="background:#f5eff9">−.18</td><td style="background:#ffe1e8;color:#a44d67">−.42</td><td style="background:#6d91f5;color:white">1.00</td><td style="background:#f5eff9">−.22</td></tr>
+<tr><th style="text-align:left">Signal</th><td style="background:#a4bcfa">.76</td><td style="background:#9bb6f9">.79</td><td style="background:#bdcef9">.63</td><td style="background:#f5eff9">−.22</td><td style="background:#6d91f5;color:white">1.00</td></tr>
+</tbody></table></div><div class="v-legend"><span><i style="background:#9bb6f9"></i>Positive</span><span><i style="background:#ffe1e8"></i>Negative</span><span><i style="background:#f5eff9"></i>Weak</span></div></article>
+<article class="v-card"><h3 class="v-title">Relationship takeaways</h3><div class="v-statrow"><div><b>Orders ↔ Revenue</b><br/><span>Strong positive relationship</span></div><b>.82</b></div><p class="v-paragraph">Order volume and revenue tend to move together in this illustrative sample.</p><div class="v-divider"></div><div class="v-statrow"><div><b>Retention ↔ Risk</b><br/><span>Negative relationship</span></div><b>−.42</b></div><p class="v-paragraph">Higher risk observations coincide with weaker retention in this example.</p><div class="v-divider"></div><div class="v-statrow"><div><b>Signal ↔ Orders</b><br/><span>Strong positive relationship</span></div><b>.79</b></div><p class="v-paragraph">Correlation alone does not prove causation; validate data quality and time lags.</p></article>
+</div>
+<div class="concept-extension ext-grid">
+<div class="ext-grid ext-two"><article class="ext-panel"><div class="ext-head"><div><h3>Correlation notes</h3><p>Summary from the sample relationship matrix</p></div><span class="ext-chip">Demo data</span></div><p class="ext-copy" style="font-size:12px">Revenue and orders show a strong positive relationship in this illustrative sample. Retention and risk are negatively associated. These patterns can guide investigation, but do not establish causation.</p><ul class="ext-bullets"><li>Revenue and orders move together most strongly (0.82).</li><li>Signal and orders also show a strong relationship (0.79).</li><li>Review time lags and data quality before drawing conclusions.</li></ul></article><article class="ext-panel"><div class="ext-label">Tracked variables</div><div class="ext-number-band"><div><strong>5</strong><small>Variables</small></div><div><strong>10</strong><small>Unique pairs</small></div><div><strong>0.82</strong><small>Strongest pair</small></div></div><p class="ext-copy">This view emphasizes relationships rather than ranking each metric by size.</p></article></div>
+<article class="ext-panel"><div class="ext-head"><div><h3>Relationship trend</h3><p>Revenue and orders through time, shown as aligned series</p></div></div><svg class="ext-series" viewbox="0 0 680 160"><g class="gridline"><path d="M25 25H655M25 65H655M25 105H655"></path></g><path d="M25 120 80 110 135 117 190 85 245 92 300 67 355 73 410 45 465 56 520 31 575 36 655 18" fill="none" stroke="#3485ff" stroke-width="3"></path><path d="M25 130 80 120 135 125 190 101 245 105 300 80 355 88 410 62 465 69 520 48 575 50 655 35" fill="none" stroke="#35c99a" stroke-dasharray="5 5" stroke-width="2.5"></path><text x="25" y="151">Earlier</text><text text-anchor="end" x="655" y="151">Now</text></svg><div class="v-legend"><span><i style="background:#3485ff"></i>Revenue</span><span><i style="background:#35c99a"></i>Orders</span></div></article>
+<article class="ext-panel"><h3>Pair detail</h3><div class="ext-table-scroll"><table class="ext-table"><thead><tr><th>Variable pair</th><th>Coefficient</th><th>Strength</th><th>Interpretation</th></tr></thead><tbody><tr><td>Revenue / Orders</td><td>0.82</td><td>Strong</td><td>Positive association</td></tr><tr><td>Signal / Orders</td><td>0.79</td><td>Strong</td><td>Positive association</td></tr><tr><td>Revenue / Retention</td><td>0.47</td><td>Moderate</td><td>Positive association</td></tr><tr><td>Retention / Risk</td><td>−0.42</td><td>Moderate</td><td>Negative association</td></tr></tbody></table></div></article>
+</div></div></section><section class="concept-view" id="concept-16"><div class="v-wrap style-table">
+<div class="v-head"><div><h2 class="v-title">Analyst workbench</h2><div class="v-sub">Prioritize comparison and scanning when many metrics matter at once.</div></div><span class="v-pill">18 signals refreshed</span></div>
+<div class="v-grid four" style="grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:15px"><article class="v-card"><div class="v-label">Tracked assets</div><div class="v-num">128</div><span class="v-muted">Current universe</span></article><article class="v-card"><div class="v-label">Strong signals</div><div class="v-num">12</div><span class="v-change">Confidence above 80</span></article><article class="v-card"><div class="v-label">Watchlist</div><div class="v-num">24</div><span class="v-muted">Need further review</span></article><article class="v-card"><div class="v-label">Latest refresh</div><div class="v-num">2 min</div><span class="v-muted">Data freshness</span></article></div>
+<div class="v-grid two" style="grid-template-columns:1.45fr .55fr">
+<article class="v-card"><div class="v-head"><div><h3 class="v-title">Ranked signals</h3><div class="v-sub">Sort any column by clicking its header</div></div></div><div class="table-scroll"><table class="v-table" id="rankTable"><thead><tr><th data-sort="rank"># ↕</th><th data-sort="name">Signal ↕</th><th data-sort="value">Value ↕</th><th data-sort="change">Change ↕</th><th data-sort="confidence">Confidence ↕</th><th>Status</th></tr></thead><tbody>
+<tr data-change="10.76" data-confidence="86" data-name="Revenue momentum" data-rank="1" data-value="33.7"><td>01</td><td><div style="display:flex;gap:8px;align-items:center"><span class="ticker">RM</span><b>Revenue momentum</b></div></td><td>₹33.7K</td><td style="color:#139c72">+10.76%</td><td><b>86</b><div class="v-bar" style="width:70px;margin-top:5px"><span style="width:86%"></span></div></td><td><span class="v-pill">Strong</span></td></tr>
+<tr data-change="2.1" data-confidence="92" data-name="Retention health" data-rank="2" data-value="92.4"><td>02</td><td><div style="display:flex;gap:8px;align-items:center"><span class="ticker">RH</span><b>Retention health</b></div></td><td>92.4%</td><td style="color:#139c72">+2.1 pts</td><td><b>92</b><div class="v-bar" style="width:70px;margin-top:5px"><span style="width:92%;background:#35c99a"></span></div></td><td><span class="v-pill">Strong</span></td></tr>
+<tr data-change="4.2" data-confidence="79" data-name="Risk exposure" data-rank="3" data-value="68.4"><td>03</td><td><div style="display:flex;gap:8px;align-items:center"><span class="ticker">RE</span><b>Risk exposure</b></div></td><td>68.4%</td><td style="color:#c98628">+4.2 pts</td><td><b>79</b><div class="v-bar" style="width:70px;margin-top:5px"><span style="width:79%;background:#ffad50"></span></div></td><td><span class="v-pill" style="background:#fff0d8;color:#9d681a">Watch</span></td></tr>
+<tr data-change="12.45" data-confidence="84" data-name="New opportunities" data-rank="4" data-value="1420"><td>04</td><td><div style="display:flex;gap:8px;align-items:center"><span class="ticker">NO</span><b>New opportunities</b></div></td><td>1,420</td><td style="color:#139c72">+12.45%</td><td><b>84</b><div class="v-bar" style="width:70px;margin-top:5px"><span style="width:84%"></span></div></td><td><span class="v-pill">Strong</span></td></tr>
+<tr data-change="-3.6" data-confidence="71" data-name="Volatility band" data-rank="5" data-value="23.1"><td>05</td><td><div style="display:flex;gap:8px;align-items:center"><span class="ticker">VB</span><b>Volatility band</b></div></td><td>23.1</td><td style="color:#139c72">−3.6%</td><td><b>71</b><div class="v-bar" style="width:70px;margin-top:5px"><span style="width:71%;background:#9b70ff"></span></div></td><td><span class="v-pill" style="background:#fff0d8;color:#9d681a">Watch</span></td></tr>
+</tbody></table></div></article>
+<aside class="v-card"><div class="v-head"><div><h3 class="v-title">Selected signal</h3><div class="v-sub">Context for the leading row</div></div></div><div class="v-label">Revenue momentum</div><div class="v-num">₹33.7K</div><span class="v-change">↑ 10.76%</span><svg class="v-chart" style="margin-top:12px" viewbox="0 0 300 120"><g class="v-gridline"><path d="M10 30H290M10 65H290M10 100H290"></path></g><path d="M10 95 42 82 73 90 105 58 136 72 168 43 199 51 230 24 260 33 290 12" fill="none" stroke="#3485ff" stroke-width="3"></path></svg><p class="v-paragraph">The revenue signal is strong in this sample. Review exposure and segment concentration alongside it before making a portfolio decision.</p><div class="v-divider"></div><div class="v-statrow"><span>Confidence</span><b>86 / 100</b></div><div class="v-statrow"><span>Current state</span><b class="v-change">Strong</b></div></aside>
+</div>
+<div class="concept-extension ext-grid">
+<div class="ext-grid ext-two"><article class="ext-panel"><div class="ext-head"><div><h3>Analyst brief</h3><p>Summary and priority checks for the ranked list</p></div><span class="ext-chip">Review ready</span></div><p class="ext-copy" style="font-size:12px">Revenue momentum ranks strongly in this sample, supported by order growth. Retention remains positive. Risk exposure should be compared with its threshold before acting on the top-ranked signal.</p><ul class="ext-bullets"><li>Use confidence as one factor, not as the only ranking criterion.</li><li>Compare value change with risk exposure and segment concentration.</li><li>Prioritize signals with clear evidence and a defined follow-up.</li></ul></article><article class="ext-panel"><h3>Portfolio snapshot</h3><div class="ext-kpi-inline"><span>Revenue</span><b>₹33,678</b></div><div class="ext-kpi-inline"><span>Orders</span><b>1,420</b></div><div class="ext-kpi-inline"><span>Retention</span><b>92.4%</b></div><div class="ext-kpi-inline"><span>Exposure</span><b style="color:#b67b20">68.4%</b></div></article></div>
+<article class="ext-panel"><div class="ext-head"><div><h3>Signal history</h3><p>Trendline for the selected highest-ranked signal</p></div><span class="ext-chip">Revenue momentum</span></div><svg class="ext-series" viewbox="0 0 680 145"><g class="gridline"><path d="M25 25H655M25 65H655M25 105H655"></path></g><path d="M25 117 80 104 135 111 190 83 245 89 300 68 355 72 410 50 465 56 520 31 575 38 655 16" fill="none" stroke="#3485ff" stroke-width="3"></path><text x="25" y="138">Earlier</text><text text-anchor="end" x="655" y="138">Now</text></svg></article>
+<article class="ext-panel"><div class="ext-head"><div><h3>Additional ranked signals</h3><p>Extended comparison outside the primary screener table</p></div></div><div class="ext-table-scroll"><table class="ext-table"><thead><tr><th>Signal</th><th>Value</th><th>Change</th><th>Confidence</th><th>State</th></tr></thead><tbody><tr><td>Revenue momentum</td><td>₹33,678</td><td>+10.76%</td><td>86</td><td><span class="ext-chip">Strong</span></td></tr><tr><td>Retention health</td><td>92.4%</td><td>+2.1 pts</td><td>92</td><td><span class="ext-chip">Strong</span></td></tr><tr><td>Risk exposure</td><td>68.4%</td><td>+4.2 pts</td><td>79</td><td><span class="ext-chip watch">Watch</span></td></tr><tr><td>Opportunity volume</td><td>1,420</td><td>+12.45%</td><td>84</td><td><span class="ext-chip">Strong</span></td></tr></tbody></table></div><p class="ext-copy">A sortable screener is best for precise comparison; this chart and summary add context without repeating the original neumorphic card grid.</p></article>
+</div></div></section>
+<div aria-live="polite" class="toast" id="toast" role="status"></div>
+</div>
+<script>
+(function () {
+  var tabs = Array.prototype.slice.call(document.querySelectorAll(".tabs button[data-view]"));
+  var panels = Array.prototype.slice.call(document.querySelectorAll("section.concept-view[id^='concept-']"));
+  var toast = document.getElementById("toast");
+  var toastTimer = null;
+
+  function showToast(message) {
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add("show");
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(function () { toast.classList.remove("show"); }, 1900);
+  }
+  function activeId() {
+    var selected = panels.find(function (panel) { return panel.classList.contains("active"); });
+    return selected ? selected.id : "concept-1";
+  }
+  function showDashboard(id) {
+    if (!panels.some(function (panel) { return panel.id === id; })) id = "concept-1";
+    panels.forEach(function (panel) {
+      var active = panel.id === id;
+      panel.classList.toggle("active", active);
+      panel.setAttribute("aria-hidden", active ? "false" : "true");
+    });
+    tabs.forEach(function (tab) {
+      var active = tab.dataset.view === id;
+      tab.classList.toggle("active", active);
+      tab.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+    try { window.localStorage.setItem("investorlens-dashboard-view", id); } catch (e) {}
+  }
+  tabs.forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      showDashboard(tab.dataset.view);
+      if (window.scrollY > 100) window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  var saveButton = document.getElementById("saveBtn");
+  if (saveButton) saveButton.addEventListener("click", function () {
+    var id = activeId();
+    var selected = tabs.find(function (tab) { return tab.dataset.view === id; });
+    var label = selected ? selected.textContent.trim().replace(/^[0-9]+\\s*[·.-]\\s*/, "") : "Neumorphism";
+    try { window.localStorage.setItem("investorlens-dashboard-saved", id); } catch (e) {}
+    var snapshot = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+    var blob = new Blob([snapshot], { type: "text/html;charset=utf-8" });
+    var blobUrl = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = "investorlens-" + label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".html";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 1500);
+    showToast("Saved " + label + " as an HTML file");
+  });
+
+  var shareButton = document.getElementById("shareBtn");
+  if (shareButton) shareButton.addEventListener("click", function () {
+    var id = activeId();
+    var selected = tabs.find(function (tab) { return tab.dataset.view === id; });
+    var label = selected ? selected.textContent.trim() : "01 · Neumorphism";
+    var url = window.location.protocol === "file:" ? "" : window.location.href;
+    var message = (url ? url + "\n" : "") + "InvestorLens dashboard: " + label;
+    if (navigator.share) {
+      var payload = { title: "InvestorLens Dashboard", text: message };
+      if (url) payload.url = url;
+      navigator.share(payload).catch(function (error) {
+        if (!error || error.name !== "AbortError") showToast("Unable to open system sharing");
+      });
+      return;
+    }
+    function fallbackCopy() {
+      var field = document.createElement("textarea");
+      field.value = message;
+      field.setAttribute("readonly", "");
+      field.style.position = "fixed";
+      field.style.left = "-9999px";
+      document.body.appendChild(field);
+      field.select();
+      var copied = false;
+      try { copied = document.execCommand("copy"); } catch (e) {}
+      field.remove();
+      showToast(copied ? "Share details copied" : "Share: " + label);
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(message).then(function () { showToast("Share details copied"); }).catch(fallbackCopy);
+    } else fallbackCopy();
+  });
+
+  // Contain any wide data table that was not wrapped in a scroll region in the original markup.
+  document.querySelectorAll(".concept-view table").forEach(function (table) {
+    if (!table.closest(".table-scroll,.ext-table-scroll,.suite-table-wrap,.gantt-wrap")) {
+      var wrapper = document.createElement("div");
+      wrapper.className = "table-scroll";
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    }
+  });
+
+  document.querySelectorAll(".heat-days").forEach(function (element) {
+    if (!element.children.length) for (var i = 0; i < 28; i++) {
+      var cell = document.createElement("span"); cell.title = "Activity day " + (i + 1); element.appendChild(cell);
+    }
+  });
+  document.querySelectorAll(".risk-matrix").forEach(function (element) {
+    if (!element.children.length) for (var j = 0; j < 25; j++) {
+      var riskCell = document.createElement("span"); riskCell.title = "Risk cell " + (j + 1); element.appendChild(riskCell);
+    }
+  });
+  document.querySelectorAll("#rankTable th[data-sort]").forEach(function (header) {
+    header.addEventListener("click", function () {
+      var body = document.querySelector("#rankTable tbody");
+      if (!body) return;
+      var key = header.dataset.sort, ascending = header.dataset.dir !== "asc";
+      header.dataset.dir = ascending ? "asc" : "desc";
+      var rows = Array.prototype.slice.call(body.rows);
+      rows.sort(function (a, b) {
+        var x = a.dataset[key] || "", y = b.dataset[key] || "";
+        if (key === "name") return ascending ? x.localeCompare(y) : y.localeCompare(x);
+        return (Number(x) - Number(y)) * (ascending ? 1 : -1);
+      });
+      rows.forEach(function (row) { body.appendChild(row); });
+    });
+  });
+  showDashboard("concept-1");
+})();
+</script>
+</body></html>
